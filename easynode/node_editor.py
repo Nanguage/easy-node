@@ -22,7 +22,8 @@ class NodeEditor(QtWidgets.QWidget):
         self.view = GraphicsView(self.scene, self)
         self.layout.addWidget(self.view)
 
-        self.try_add_items()
+        #self.try_add_items()
+        self.test_add_elements()
 
     def try_add_items(self):
         # for learn API
@@ -53,3 +54,8 @@ class NodeEditor(QtWidgets.QWidget):
         line = self.scene.addLine(200, 10, 500, 100, line_pen)
         line.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
         line.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
+
+    def test_add_elements(self):
+        from .model.node import Node
+        n = Node()
+        n.create_view(self.scene)
