@@ -5,7 +5,7 @@ from qtpy import QtWidgets, QtGui, QtCore
 
 
 @dataclass
-class GraphViewSetting:
+class GraphicsViewSetting:
     antialiasing: bool = True
     default_slider_position: T.Tuple[int, int] = (1, 1)
     hidden_sliders: bool = True
@@ -15,15 +15,15 @@ class GraphViewSetting:
     zoom_range: T.Tuple[int, int] = (0, 10)
 
 
-class GraphView(QtWidgets.QGraphicsView):
+class GraphicsView(QtWidgets.QGraphicsView):
     def __init__(
             self,
             scene: QtWidgets.QGraphicsScene,
             parent: T.Optional[QtWidgets.QWidget]=None,
-            setting: T.Optional[GraphViewSetting]=None):
+            setting: T.Optional[GraphicsViewSetting]=None):
         super().__init__(parent)
         if setting is None:
-            setting = GraphViewSetting()
+            setting = GraphicsViewSetting()
         self.setting = setting
         self.setScene(scene)
         self.setup_layout()

@@ -2,8 +2,8 @@ import typing as T
 
 from qtpy import QtWidgets
 
-from .graph_scene import GraphScene
-from .graph_view import GraphView
+from .qt.graphics_scene import GraphicsScene
+from .qt.graphics_view import GraphicsView
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -15,11 +15,11 @@ class NodeEditor(QtWidgets.QWidget):
         self.resize(800, 600)
         self.setWindowTitle("EasyNode")
 
-        self.scene = GraphScene(self)
+        self.scene = GraphicsScene(self)
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.view = GraphView(self.scene, self)
+        self.view = GraphicsView(self.scene, self)
         self.layout.addWidget(self.view)
 
         self.try_add_items()

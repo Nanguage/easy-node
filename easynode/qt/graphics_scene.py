@@ -6,7 +6,7 @@ from qtpy import QtWidgets, QtCore, QtGui
 
 
 @dataclass
-class SceneSetting:
+class GraphicsSceneSetting:
     width: int = 8000
     height: int = 8000
     background_color: str = "#393939"
@@ -17,14 +17,14 @@ class SceneSetting:
     grid_loose_per_dense: int = 4
 
 
-class GraphScene(QtWidgets.QGraphicsScene):
+class GraphicsScene(QtWidgets.QGraphicsScene):
     def __init__(
             self,
             parent: T.Optional[QtWidgets.QWidget] = None,
-            setting: T.Optional[SceneSetting] = None):
+            setting: T.Optional[GraphicsSceneSetting] = None):
         super().__init__(parent)
         if setting is None:
-            setting = SceneSetting()
+            setting = GraphicsSceneSetting()
         self.setting = setting
         w, h = setting.width, setting.height
         self.setSceneRect(0, 0, w, h)
