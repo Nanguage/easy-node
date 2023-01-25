@@ -57,5 +57,10 @@ class NodeEditor(QtWidgets.QWidget):
 
     def test_add_elements(self):
         from .model.node import Node
-        n = Node()
+        #n = Node()
+        #n.create_view(self.scene)
+        class TestWidgetNode(Node):
+            def init_widget(self):
+                self.widget = QtWidgets.QTextEdit()
+        n = TestWidgetNode()
         n.create_view(self.scene)

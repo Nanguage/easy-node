@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from qtpy import QtWidgets, QtGui, QtCore
 
 if T.TYPE_CHECKING:
-    from ..model.node import Node
+    from ...model.node import Node
 
 
 @dataclass
@@ -15,7 +15,7 @@ class NodeViewSetting:
     title_area_height: float = 24.0
     title_area_color: str = "#FF33363"
     background_color: str = "#E0222222"
-    default_width: float = 100.0
+    default_width: float = 200.0
     outline_radius: float = 10.0
     outline_color: str = "#7F000000"  # alpha, R, G, B
     outline_color_selected: str = "#FFFFA637"
@@ -48,6 +48,7 @@ class NodeView(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
         self.init_title()
+        self.init_content()
 
     def init_title(self):
         title_color = QtGui.QColor(self.setting.title_color)
@@ -61,6 +62,18 @@ class NodeView(QtWidgets.QGraphicsItem):
         self.title.setPos(padding, 0)
         self.title.setTextWidth(width - 2 * padding)
 
+    def init_content(self):
+        if self.node.widget is not None:
+            radius = self.setting.outline_radius
+            title_height = self.setting.title_area_height
+            width, height = self.size
+            self.widget_proxy = QtWidgets.QGraphicsProxyWidget(self)
+            self.node.widget.setGeometry(
+                radius, title_height + radius,
+                width - 2 * radius, height - 2 * radius - title_height
+            )
+            self.widget_proxy.setWidget(self.node.widget)
+
     def boundingRect(self) -> QtCore.QRectF:
         width, _ = self.size
         radius = self.setting.outline_radius
@@ -72,7 +85,7 @@ class NodeView(QtWidgets.QGraphicsItem):
     @property
     def size(self) -> T.Tuple[int, int]:
         width = self.setting.default_width
-        height = 150
+        height = 250
         return width, height
 
     def paint(self,
