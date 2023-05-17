@@ -29,10 +29,14 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
         w, h = setting.width, setting.height
         self.setSceneRect(0, 0, w, h)
         self.setBackgroundBrush(QtGui.QColor(setting.background_color))
-        self.pen_grid_dense = QtGui.QPen(self.setting.grid_color_dense)
-        self.pen_grid_loose = QtGui.QPen(self.setting.grid_color_loose)
+        self.pen_grid_dense = QtGui.QPen(
+            QtGui.QColor(self.setting.grid_color_dense))
+        self.pen_grid_loose = QtGui.QPen(
+            QtGui.QColor(self.setting.grid_color_loose))
 
-    def drawBackground(self, painter: QtGui.QPainter, rect: T.Union[QtCore.QRectF, QtCore.QRect]) -> None:
+    def drawBackground(
+            self, painter: QtGui.QPainter,
+            rect: T.Union[QtCore.QRectF, QtCore.QRect]) -> None:
         super().drawBackground(painter, rect)
         if self.setting.draw_grid:
             grid_size = self.setting.grid_size
@@ -48,13 +52,13 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
             lines_dense = []
             lines_loose = []
             for x in range(first_l, r, grid_size):
-                line = QtCore.QLine(x, t, x, b)
+                line = QtCore.QLineF(x, t, x, b)
                 if x % (grid_size * ratio) != 0:
                     lines_dense.append(line)
                 else:
                     lines_loose.append(line)
             for y in range(first_t, b, grid_size):
-                line = QtCore.QLine(l, y, r, y)
+                line = QtCore.QLineF(l, y, r, y)
                 if y % (grid_size * ratio) != 0:
                     lines_dense.append(line)
                 else:

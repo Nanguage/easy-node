@@ -19,8 +19,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def __init__(
             self,
             scene: QtWidgets.QGraphicsScene,
-            parent: T.Optional[QtWidgets.QWidget]=None,
-            setting: T.Optional[GraphicsViewSetting]=None):
+            parent: T.Optional[QtWidgets.QWidget] = None,
+            setting: T.Optional[GraphicsViewSetting] = None):
         super().__init__(parent)
         if setting is None:
             setting = GraphicsViewSetting()
@@ -35,60 +35,64 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.verticalScrollBar().setSliderPosition(y)
         self.horizontalScrollBar().setSliderPosition(x)
         if self.setting.antialiasing:
-            self.setRenderHint(
+            self.setRenderHints(
                 QtGui.QPainter.Antialiasing |
                 QtGui.QPainter.TextAntialiasing |
                 QtGui.QPainter.SmoothPixmapTransform
             )
         if self.setting.full_view_update:
-            self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
+            self.setViewportUpdateMode(
+                QtWidgets.QGraphicsView.FullViewportUpdate)
         if self.setting.hidden_sliders:
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
-        if event.button() == QtCore.Qt.MiddleButton:
+        if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
             self.middleMouseButtonPress(event)
         else:
             super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
-        if event.button() == QtCore.Qt.MiddleButton:
+        if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
             self.middleMouseButtonRelease(event)
         else:
             return super().mouseReleaseEvent(event)
 
     def middleMouseButtonPress(self, event: QtGui.QMouseEvent):
         fake_release_midele = QtGui.QMouseEvent(
-            QtCore.QEvent.MouseButtonRelease, event.localPos(), event.screenPos(),
-            QtCore.Qt.MiddleButton, QtCore.Qt.NoButton, event.modifiers())
+            QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
+            event.screenPos(), QtCore.Qt.MiddleButton,  # type: ignore
+            QtCore.Qt.NoButton, event.modifiers())  # type: ignore
         super().mouseReleaseEvent(fake_release_midele)
         self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
         fake_press_left = QtGui.QMouseEvent(
             event.type(), event.localPos(), event.screenPos(),
-            QtCore.Qt.LeftButton, QtCore.Qt.NoButton, event.modifiers())
+            QtCore.Qt.LeftButton, QtCore.Qt.NoButton,  # type: ignore
+            event.modifiers())
         super().mousePressEvent(fake_press_left)
 
     def middleMouseButtonRelease(self, event: QtGui.QMouseEvent):
         fake_release_left = QtGui.QMouseEvent(
-            QtCore.QEvent.MouseButtonRelease, event.localPos(), event.screenPos(),
-            QtCore.Qt.LeftButton, QtCore.Qt.NoButton, event.modifiers())
+            QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
+            event.screenPos(), QtCore.Qt.LeftButton,  # type: ignore
+            QtCore.Qt.NoButton, event.modifiers())  # type: ignore
         super().mouseReleaseEvent(fake_release_left)
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
-        if event.key() == QtCore.Qt.Key_Control:
+        if event.key() == QtCore.Qt.Key_Control:  # type: ignore
             self.zoom_mode = True
         super().keyPressEvent(event)
-    
+
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
-        if event.key() == QtCore.Qt.Key_Control:
+        if event.key() == QtCore.Qt.Key_Control:  # type: ignore
             self.zoom_mode = False
         super().keyReleaseEvent(event)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
-        if self.zoom_mode == False:
+        if not self.zoom_mode:
             return super().wheelEvent(event)
         zoom_out_factor = 1 / self.setting.zoom_in_factor
         zoom_range = self.setting.zoom_range
@@ -105,4 +109,3 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self.current_zoom, clamped = zoom_range[1], True
         if not clamped:
             self.scale(zoom_factor, zoom_factor)
-

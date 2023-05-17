@@ -7,7 +7,10 @@ from .qt.graphics_view import GraphicsView
 
 
 class NodeEditor(QtWidgets.QWidget):
-    def __init__(self, parent: T.Optional[QtWidgets.QWidget]=None) -> None:
+    def __init__(
+            self,
+            parent: T.Optional[QtWidgets.QWidget] = None,
+            ) -> None:
         super().__init__(parent)
         self.init_layout()
 
@@ -22,7 +25,7 @@ class NodeEditor(QtWidgets.QWidget):
         self.view = GraphicsView(self.scene, self)
         self.layout.addWidget(self.view)
 
-        #self.try_add_items()
+        # self.try_add_items()
         self.test_add_elements()
 
     def try_add_items(self):
@@ -57,10 +60,12 @@ class NodeEditor(QtWidgets.QWidget):
 
     def test_add_elements(self):
         from .model.node import Node
-        #n = Node()
-        #n.create_view(self.scene)
+        # n = Node()
+        # n.create_view(self.scene)
+
         class TestWidgetNode(Node):
             def init_widget(self):
                 self.widget = QtWidgets.QTextEdit()
+
         n = TestWidgetNode()
         n.create_view(self.scene)

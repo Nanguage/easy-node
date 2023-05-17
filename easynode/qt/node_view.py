@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from qtpy import QtWidgets, QtGui, QtCore
 
 if T.TYPE_CHECKING:
-    from ...model.node import Node
+    from ..model import Node  # type: ignore
 
 
 @dataclass
@@ -15,7 +15,7 @@ class NodeViewSetting:
     title_area_height: float = 24.0
     title_area_color: str = "#FF33363"
     background_color: str = "#E0222222"
-    default_width: float = 200.0
+    default_width: int = 200
     outline_radius: float = 10.0
     outline_color: str = "#7F000000"  # alpha, R, G, B
     outline_color_selected: str = "#FFFFA637"
@@ -40,7 +40,8 @@ class NodeView(QtWidgets.QGraphicsItem):
         QBrush = QtGui.QBrush
         setting = self.setting
         self.pen_outline = QPen(QColor(setting.outline_color))
-        self.pen_outline_selected = QPen(QColor(setting.outline_color_selected))
+        self.pen_outline_selected = QPen(
+            QColor(setting.outline_color_selected))
         self.brush_title_area = QBrush(QColor(setting.title_area_color))
         self.brush_background = QBrush(QColor(setting.background_color))
 
@@ -97,26 +98,35 @@ class NodeView(QtWidgets.QGraphicsItem):
         outline_radius = self.setting.outline_radius
         # title area
         path_title = QtGui.QPainterPath()
-        path_title.setFillRule(QtCore.Qt.WindingFill)
-        path_title.addRoundedRect(0, 0, width, title_height, outline_radius, outline_radius)
-        path_title.addRect(0, title_height - outline_radius, outline_radius, outline_radius)
-        path_title.addRect(width - outline_radius, title_height - outline_radius, outline_radius, outline_radius)
-        painter.setPen(QtCore.Qt.NoPen)
+        path_title.setFillRule(QtCore.Qt.WindingFill)  # type: ignore
+        path_title.addRoundedRect(
+            0, 0, width, title_height, outline_radius, outline_radius)
+        path_title.addRect(
+            0, title_height - outline_radius, outline_radius, outline_radius)
+        path_title.addRect(
+            width - outline_radius, title_height - outline_radius,
+            outline_radius, outline_radius)
+        painter.setPen(QtCore.Qt.NoPen)  # type: ignore
         painter.setBrush(self.brush_title_area)
         painter.drawPath(path_title.simplified())
         # body area
         path_body = QtGui.QPainterPath()
-        path_body.setFillRule(QtCore.Qt.WindingFill)
-        path_body.addRoundedRect(0, title_height, width, height - title_height, outline_radius, outline_radius)
+        path_body.setFillRule(QtCore.Qt.WindingFill)  # type: ignore
+        path_body.addRoundedRect(
+            0, title_height, width, height - title_height,
+            outline_radius, outline_radius)
         path_body.addRect(0, title_height, outline_radius, outline_radius)
-        path_body.addRect(width-outline_radius, title_height, outline_radius, outline_radius)
-        painter.setPen(QtCore.Qt.NoPen)
+        path_body.addRect(
+            width-outline_radius, title_height, outline_radius, outline_radius)
+        painter.setPen(QtCore.Qt.NoPen)  # type: ignore
         painter.setBrush(self.brush_background)
         painter.drawPath(path_body.simplified())
         # outline
         path_outline = QtGui.QPainterPath()
-        path_outline.addRoundedRect(0, 0, width, height, outline_radius, outline_radius)
-        painter.setPen(self.pen_outline if not self.isSelected() else self.pen_outline_selected)
-        painter.setBrush(QtCore.Qt.NoBrush)
+        path_outline.addRoundedRect(
+            0, 0, width, height, outline_radius, outline_radius)
+        painter.setPen(
+            self.pen_outline if not self.isSelected()
+            else self.pen_outline_selected)
+        painter.setBrush(QtCore.Qt.NoBrush)  # type: ignore
         painter.drawPath(path_outline)
-

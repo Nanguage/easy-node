@@ -1,10 +1,12 @@
+import typing as T
 from .node import Node
 from .edge import Edge
 
+
 class Graph:
     def __init__(self) -> None:
-        self.nodes = dict()
-        self.edges = dict()
+        self.nodes: T.Dict[str, Node] = dict()
+        self.edges: T.Dict[str, Edge] = dict()
 
     def add_node(self, node: Node):
         pass
