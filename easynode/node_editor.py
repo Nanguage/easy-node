@@ -1,9 +1,13 @@
 import typing as T
+import os.path as osp
 
 from qtpy import QtWidgets
 
-from .qt.graphics_scene import GraphicsScene
-from .qt.graphics_view import GraphicsView
+from .widgets.graphics_scene import GraphicsScene
+from .widgets.graphics_view import GraphicsView
+
+
+HERE = osp.dirname(osp.abspath(__file__))
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -13,6 +17,7 @@ class NodeEditor(QtWidgets.QWidget):
             ) -> None:
         super().__init__(parent)
         self.init_layout()
+        self.load_style_sheet(osp.join(HERE, "qss/node.qss"))
 
     def init_layout(self):
         self.resize(800, 600)
@@ -60,12 +65,17 @@ class NodeEditor(QtWidgets.QWidget):
 
     def test_add_elements(self):
         from .model.node import Node
-        # n = Node()
-        # n.create_view(self.scene)
+
+        n = Node(name="test1")
+        n.create_view(self.scene)
 
         class TestWidgetNode(Node):
             def init_widget(self):
                 self.widget = QtWidgets.QTextEdit()
 
-        n = TestWidgetNode()
+        n = TestWidgetNode(name="test2")
         n.create_view(self.scene)
+
+    def load_style_sheet(self, path: str):
+        with open(path, "r") as f:
+            self.setStyleSheet(f.read())
