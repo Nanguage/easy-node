@@ -5,7 +5,7 @@ from qtpy import QtWidgets, QtGui, QtCore
 from ..setting import NodeItemSetting  # type: ignore
 
 if T.TYPE_CHECKING:
-    from ..model import Node  # type: ignore
+    from ..model import Node, Port  # type: ignore
 
 
 class NodeItem(QtWidgets.QGraphicsItem):
@@ -70,24 +70,47 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.widget_proxy.setWidget(widget)
 
     def init_ports(self, layout: QtWidgets.QVBoxLayout):
+        in_ports = self.node.input_ports
+        out_ports = self.node.output_ports
         ports_widget = QtWidgets.QWidget()
         ports_layout = QtWidgets.QVBoxLayout()
         ports_layout.setContentsMargins(0, 0, 0, 0)
         ports_widget.setLayout(ports_layout)
-        padding = self.setting.port_setting.item_setting.radius
-        for port in self.node.input_ports:
-            port_label = QtWidgets.QLabel(port.name)
-            port_label.setStyleSheet(f"padding-left: {padding}px")
-            port_label.setFixedHeight(self.setting.port_setting.height)
-            ports_layout.addWidget(port_label)
+        max_port_idx = max(len(in_ports), len(out_ports))
+        for idx in range(max_port_idx):
+            port_widget = QtWidgets.QWidget()
+            port_layout = QtWidgets.QHBoxLayout()
+            port_layout.setContentsMargins(0, 0, 0, 0)
+            port_widget.setLayout(port_layout)
+            for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
+                port = ports[idx]
+                port_label = self._get_port_label(port, tp)
+                if idx < len(ports):
+                    port_layout.addWidget(port_label)
+                else:
+                    port_layout.addStretch()
+            ports_layout.addWidget(port_widget)
         layout.addWidget(ports_widget)
 
+    def _get_port_label(
+            self, port: "Port", tp: str,
+            ) -> QtWidgets.QLabel:
+        padding = self.setting.port_setting.item_setting.radius
+        port_label = QtWidgets.QLabel(port.name)
+        if tp == 'in':
+            port_label.setAlignment(
+                QtCore.Qt.AlignLeft)  # type: ignore
+            port_label.setStyleSheet(f"padding-left: {padding}px")
+        else:
+            port_label.setAlignment(
+                QtCore.Qt.AlignRight)  # type: ignore
+            port_label.setStyleSheet(f"padding-right: {padding}px")
+        return port_label
+
     def boundingRect(self) -> QtCore.QRectF:
-        width, _ = self.size
-        radius = self.setting.outline_radius
-        x = 2 * width + radius
+        width, height = self.size
         return QtCore.QRectF(
-            0, 0, x, x
+            0, 0, width, height
         ).normalized()
 
     @property

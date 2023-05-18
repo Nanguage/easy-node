@@ -83,6 +83,11 @@ class NodeEditor(QtWidgets.QWidget):
                 Port(name="in1"),
                 Port(name="in2"),
             ],
+            output_ports=[
+                Port(name="out1"),
+                Port(name="out2"),
+                Port(name="out3"),
+            ],
             widget=text_edit)
         n.create_view(self.scene)
 
