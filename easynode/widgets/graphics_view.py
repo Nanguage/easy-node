@@ -1,18 +1,7 @@
 import typing as T
-from dataclasses import dataclass
 
 from qtpy import QtWidgets, QtGui, QtCore
-
-
-@dataclass
-class GraphicsViewSetting:
-    antialiasing: bool = True
-    default_slider_position: T.Tuple[int, int] = (1, 1)
-    hidden_sliders: bool = True
-    full_view_update: bool = True
-    zoom_in_factor: float = 1.25
-    zoom_step: int = 1
-    zoom_range: T.Tuple[int, int] = (0, 10)
+from ..setting import GraphicsViewSetting  # type: ignore
 
 
 class GraphicsView(QtWidgets.QGraphicsView):

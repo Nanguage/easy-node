@@ -5,6 +5,7 @@ from qtpy import QtWidgets
 
 from .widgets.graphics_scene import GraphicsScene
 from .widgets.graphics_view import GraphicsView
+from .setting import GraphicsViewSetting
 
 
 HERE = osp.dirname(osp.abspath(__file__))
@@ -14,8 +15,10 @@ class NodeEditor(QtWidgets.QWidget):
     def __init__(
             self,
             parent: T.Optional[QtWidgets.QWidget] = None,
+            graphics_view_setting: T.Optional[GraphicsViewSetting] = None,
             ) -> None:
         super().__init__(parent)
+        self.graphics_view_setting = graphics_view_setting
         self.init_layout()
         self.load_style_sheet(osp.join(HERE, "qss/node.qss"))
 
@@ -27,7 +30,8 @@ class NodeEditor(QtWidgets.QWidget):
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.view = GraphicsView(self.scene, self)
+        self.view = GraphicsView(
+            self.scene, self, self.graphics_view_setting)
         self.layout.addWidget(self.view)
 
         # self.try_add_items()
@@ -66,14 +70,13 @@ class NodeEditor(QtWidgets.QWidget):
     def test_add_elements(self):
         from .model.node import Node
 
-        n = Node(name="test1")
+        n = Node(type_name="Test", name="test1")
         n.create_view(self.scene)
 
-        class TestWidgetNode(Node):
-            def init_widget(self):
-                self.widget = QtWidgets.QTextEdit()
-
-        n = TestWidgetNode(name="test2")
+        text_edit = QtWidgets.QTextEdit()
+        n = Node(
+            type_name="TextNode", name="test2",
+            widget=text_edit)
         n.create_view(self.scene)
 
     def load_style_sheet(self, path: str):

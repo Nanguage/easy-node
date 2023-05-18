@@ -1,25 +1,11 @@
 import typing as T
-from dataclasses import dataclass
 
 from qtpy import QtWidgets, QtGui, QtCore
 
+from ..setting import NodeViewSetting  # type: ignore
+
 if T.TYPE_CHECKING:
     from ..model import Node  # type: ignore
-
-
-@dataclass
-class NodeViewSetting:
-    title_color: str = "#ffffff"
-    title_font_size: float = 10
-    title_padding: float = 5.0
-    title_area_height: float = 24.0
-    title_area_color: str = "#FF33363"
-    background_color: str = "#E0222222"
-    default_width: float = 200.0
-    outline_radius: float = 10.0
-    outline_width: float = 2.0
-    outline_color: str = "#7F000000"  # alpha, R, G, B
-    outline_color_selected: str = "#FFFFA637"
 
 
 class NodeView(QtWidgets.QGraphicsItem):

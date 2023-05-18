@@ -1,30 +1,57 @@
 import typing as T
 
 from ..widgets.node_view import NodeView
+from ..setting import NodeViewSetting
 
 if T.TYPE_CHECKING:
     from ..widgets.graphics_scene import GraphicsScene
     from qtpy.QtWidgets import QWidget
 
 
-class NodeBase:
-    def __init__(self) -> None:
-        self.widget: T.Optional["QWidget"] = None
-        self.init_widget()
-
-    def init_widget(self):
-        pass
-
-
-class Node(NodeBase):
+class Port():
     def __init__(self, name: str) -> None:
         self.name = name
-        super().__init__()
+        self.node: T.Optional[Node] = None
+
+
+class DataPort(Port):
+    def __init__(
+            self, name: str,
+            data_type: type = object,
+            data_range: object = None,
+            data_default: object = None) -> None:
+        super().__init__(name)
+        self.data_type = data_type
+        self.data_range = data_range
+        self.data_default = data_default
+
+
+class Node(object):
+    def __init__(
+            self,
+            type_name: str,
+            name: str,
+            input_ports: T.Optional[T.List[Port]] = None,
+            output_ports: T.Optional[T.List[Port]] = None,
+            widget: T.Optional["QWidget"] = None
+            ) -> None:
+        self.type_name = type_name
+        self.name = name
+        self.widget: T.Optional["QWidget"] = None
+        if input_ports is None:
+            input_ports = []
+        if output_ports is None:
+            output_ports = []
+        self.input_ports = input_ports
+        self.output_ports = output_ports
+        self.widget = widget
 
     @property
     def title(self) -> str:
-        return self.__class__.__name__ + ": " + self.name
+        return self.type_name + ": " + self.name
 
-    def create_view(self, scene: "GraphicsScene"):
-        view = NodeView(None, self)
+    def create_view(
+            self, scene: "GraphicsScene",
+            setting: T.Optional[NodeViewSetting] = None):
+        view = NodeView(None, self, setting)
         scene.addItem(view)
