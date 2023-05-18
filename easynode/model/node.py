@@ -23,7 +23,7 @@ class Node(NodeBase):
 
     @property
     def title(self) -> str:
-        return self.__class__.__name__
+        return self.__class__.__name__ + ": " + self.name
 
     def create_view(self, scene: "GraphicsScene"):
         view = NodeView(None, self)

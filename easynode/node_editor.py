@@ -78,4 +78,5 @@ class NodeEditor(QtWidgets.QWidget):
 
     def load_style_sheet(self, path: str):
         with open(path, "r") as f:
-            self.setStyleSheet(f.read())
+            app = QtWidgets.QApplication.instance()
+            app.setStyleSheet(f.read())  # type: ignore

@@ -20,7 +20,6 @@ class NodeViewSetting:
     outline_width: float = 2.0
     outline_color: str = "#7F000000"  # alpha, R, G, B
     outline_color_selected: str = "#FFFFA637"
-    name_widget_height: float = 10.0
 
 
 class NodeView(QtWidgets.QGraphicsItem):
@@ -71,21 +70,15 @@ class NodeView(QtWidgets.QGraphicsItem):
     def init_content(self):
         widget = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
-        name_label = QtWidgets.QLabel(self.node.title)
-        name_label.setFixedHeight(self.setting.name_widget_height)
-        layout.addWidget(name_label)
         if self.node.widget is not None:
+            self.node.widget.setParent(widget)
+            self.node.widget.setContentsMargins(0, 0, 0, 0)
             layout.addWidget(self.node.widget)
-        radius = self.setting.outline_radius
         title_height = self.setting.title_area_height
-        width, height = self.size
         outline_width = self.setting.outline_width
-        widget.setGeometry(QtCore.QRect(
-            outline_width, title_height,
-            width - 2 * outline_width,
-            height - radius - title_height
-        ))
+        widget.move(outline_width, title_height)
         self.widget_proxy = QtWidgets.QGraphicsProxyWidget(parent=self)
         self.widget_proxy.setWidget(widget)
 
@@ -99,8 +92,15 @@ class NodeView(QtWidgets.QGraphicsItem):
 
     @property
     def size(self) -> T.Tuple[float, float]:
-        width = self.setting.default_width
-        height = self.setting.title_area_height + self.setting.name_widget_height
+        if self.node.widget is not None:
+            width = self.node.widget.width()
+        else:
+            width = self.setting.default_width
+        width += 2 * self.setting.outline_width
+        height = (
+            self.setting.title_area_height
+            + self.setting.outline_radius
+        )
         if self.node.widget is not None:
             height += self.node.widget.height()
         return width, height
