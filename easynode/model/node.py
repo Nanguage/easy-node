@@ -1,10 +1,10 @@
 import typing as T
 
-from ..widgets.node_view import NodeView
+from ..widgets.node_item import NodeItem
 from ..setting import NodeViewSetting
 
 if T.TYPE_CHECKING:
-    from ..widgets.graphics_scene import GraphicsScene
+    from ..widgets.scene import GraphicsScene
     from qtpy.QtWidgets import QWidget
 
 
@@ -53,5 +53,5 @@ class Node(object):
     def create_view(
             self, scene: "GraphicsScene",
             setting: T.Optional[NodeViewSetting] = None):
-        view = NodeView(None, self, setting)
+        view = NodeItem(None, self, setting)
         scene.addItem(view)

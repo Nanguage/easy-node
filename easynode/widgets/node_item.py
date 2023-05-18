@@ -8,7 +8,7 @@ if T.TYPE_CHECKING:
     from ..model import Node  # type: ignore
 
 
-class NodeView(QtWidgets.QGraphicsItem):
+class NodeItem(QtWidgets.QGraphicsItem):
     def __init__(
             self, parent: QtWidgets.QWidget,
             node: "Node",

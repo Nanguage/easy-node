@@ -1,20 +1,9 @@
 import math
 import typing as T
-from dataclasses import dataclass
 
 from qtpy import QtWidgets, QtCore, QtGui
 
-
-@dataclass
-class GraphicsSceneSetting:
-    width: int = 8000
-    height: int = 8000
-    background_color: str = "#393939"
-    draw_grid: bool = True
-    grid_size: int = 25
-    grid_color_dense: str = "#2f2f2f"
-    grid_color_loose: str = "#191919"
-    grid_loose_per_dense: int = 4
+from ..setting import GraphicsSceneSetting  # type: ignore
 
 
 class GraphicsScene(QtWidgets.QGraphicsScene):
