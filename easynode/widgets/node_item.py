@@ -3,6 +3,7 @@ import typing as T
 from qtpy import QtWidgets, QtGui, QtCore
 
 from ..setting import NodeItemSetting  # type: ignore
+from .port_item import PortItem
 
 if T.TYPE_CHECKING:
     from ..model import Node, Port  # type: ignore
@@ -72,21 +73,22 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def init_ports(self, layout: QtWidgets.QVBoxLayout):
         in_ports = self.node.input_ports
         out_ports = self.node.output_ports
-        ports_widget = QtWidgets.QWidget()
+        ports_widget = QtWidgets.QWidget(parent=self.content_widget)
         ports_layout = QtWidgets.QVBoxLayout()
         ports_layout.setContentsMargins(0, 0, 0, 0)
         ports_widget.setLayout(ports_layout)
         max_port_idx = max(len(in_ports), len(out_ports))
         for idx in range(max_port_idx):
-            port_widget = QtWidgets.QWidget()
+            port_widget = QtWidgets.QWidget(parent=ports_widget)
             port_layout = QtWidgets.QHBoxLayout()
             port_layout.setContentsMargins(0, 0, 0, 0)
             port_widget.setLayout(port_layout)
             for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
-                port = ports[idx]
-                port_label = self._get_port_label(port, tp)
                 if idx < len(ports):
+                    port = ports[idx]
+                    port_label = self._get_port_label(port, tp)
                     port_layout.addWidget(port_label)
+                    self._add_port_item(tp, idx)
                 else:
                     port_layout.addStretch()
             ports_layout.addWidget(port_widget)
@@ -107,6 +109,19 @@ class NodeItem(QtWidgets.QGraphicsItem):
             port_label.setStyleSheet(f"padding-right: {padding}px")
         return port_label
 
+    def _add_port_item(self, tp: str, idx: int):
+        port_item = PortItem(
+            self, self.setting.port_setting.item_setting)
+        y = self.setting.title_area_height
+        y += self.setting.port_setting.item_setting.radius
+        y += self.setting.port_setting.height * idx
+        if tp == 'in':
+            port_item.setPos(0, y)
+        else:
+            # TODO: fix bug
+            print(self.size)
+            port_item.setPos(self.width, y)
+
     def boundingRect(self) -> QtCore.QRectF:
         width, height = self.size
         return QtCore.QRectF(
@@ -116,20 +131,20 @@ class NodeItem(QtWidgets.QGraphicsItem):
     @property
     def width(self) -> float:
         if self.node.widget is not None:
-            width = self.node.widget.width()
+            w = self.node.widget.width()
         else:
-            width = self.setting.default_width
-        width += 2 * self.setting.outline_width
-        return width
+            w = self.setting.default_width
+        w += 2 * self.setting.outline_width
+        return w
 
     @property
     def height(self) -> float:
-        height = (
+        h = (
             self.setting.title_area_height
             + self.setting.outline_radius
             + self.content_widget.height()
         )
-        return height
+        return h
 
     @property
     def size(self) -> T.Tuple[float, float]:

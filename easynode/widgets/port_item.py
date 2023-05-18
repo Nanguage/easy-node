@@ -14,6 +14,7 @@ class PortItem(QtWidgets.QGraphicsItem):
         if setting is None:
             setting = PortItemSetting()
         self.setting = setting
+        self.init_pen_and_brush()
 
     def init_pen_and_brush(self):
         QColor = QtGui.QColor
