@@ -1,29 +1,12 @@
 import typing as T
 
+from .port import Port
 from ..widgets.node_item import NodeItem
-from ..setting import NodeViewSetting
+from ..setting import NodeItemSetting
 
 if T.TYPE_CHECKING:
     from ..widgets.scene import GraphicsScene
     from qtpy.QtWidgets import QWidget
-
-
-class Port():
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.node: T.Optional[Node] = None
-
-
-class DataPort(Port):
-    def __init__(
-            self, name: str,
-            data_type: type = object,
-            data_range: object = None,
-            data_default: object = None) -> None:
-        super().__init__(name)
-        self.data_type = data_type
-        self.data_range = data_range
-        self.data_default = data_default
 
 
 class Node(object):
@@ -52,6 +35,6 @@ class Node(object):
 
     def create_view(
             self, scene: "GraphicsScene",
-            setting: T.Optional[NodeViewSetting] = None):
+            setting: T.Optional[NodeItemSetting] = None):
         view = NodeItem(None, self, setting)
         scene.addItem(view)

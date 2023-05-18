@@ -2,7 +2,7 @@ import typing as T
 
 from qtpy import QtWidgets, QtGui, QtCore
 
-from ..setting import NodeViewSetting  # type: ignore
+from ..setting import NodeItemSetting  # type: ignore
 
 if T.TYPE_CHECKING:
     from ..model import Node  # type: ignore
@@ -12,11 +12,11 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def __init__(
             self, parent: QtWidgets.QWidget,
             node: "Node",
-            setting: T.Optional[NodeViewSetting] = None):
+            setting: T.Optional[NodeItemSetting] = None):
         super().__init__(parent=parent)
         if setting is None:
-            setting = NodeViewSetting()
-        self.setting: NodeViewSetting = setting
+            setting = NodeItemSetting()
+        self.setting: NodeItemSetting = setting
         self.node = node
         self.init_layout()
         self.setup_pens_and_brushs()
@@ -48,16 +48,17 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.title.setDefaultTextColor(title_color)
         self.title.setFont(title_font)
         self.title.setPlainText(self.node.title)
-        width, _ = self.size
+        width = self.width
         padding = self.setting.title_padding
         self.title.setPos(padding, 0)
         self.title.setTextWidth(width - 2 * padding)
 
     def init_content(self):
-        widget = QtWidgets.QWidget()
+        self.content_widget = widget = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
+        self.init_ports(layout)
         if self.node.widget is not None:
             self.node.widget.setParent(widget)
             self.node.widget.setContentsMargins(0, 0, 0, 0)
@@ -68,6 +69,19 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.widget_proxy = QtWidgets.QGraphicsProxyWidget(parent=self)
         self.widget_proxy.setWidget(widget)
 
+    def init_ports(self, layout: QtWidgets.QVBoxLayout):
+        ports_widget = QtWidgets.QWidget()
+        ports_layout = QtWidgets.QVBoxLayout()
+        ports_layout.setContentsMargins(0, 0, 0, 0)
+        ports_widget.setLayout(ports_layout)
+        padding = self.setting.port_setting.item_setting.radius
+        for port in self.node.input_ports:
+            port_label = QtWidgets.QLabel(port.name)
+            port_label.setStyleSheet(f"padding-left: {padding}px")
+            port_label.setFixedHeight(self.setting.port_setting.height)
+            ports_layout.addWidget(port_label)
+        layout.addWidget(ports_widget)
+
     def boundingRect(self) -> QtCore.QRectF:
         width, _ = self.size
         radius = self.setting.outline_radius
@@ -77,19 +91,26 @@ class NodeItem(QtWidgets.QGraphicsItem):
         ).normalized()
 
     @property
-    def size(self) -> T.Tuple[float, float]:
+    def width(self) -> float:
         if self.node.widget is not None:
             width = self.node.widget.width()
         else:
             width = self.setting.default_width
         width += 2 * self.setting.outline_width
+        return width
+
+    @property
+    def height(self) -> float:
         height = (
             self.setting.title_area_height
             + self.setting.outline_radius
+            + self.content_widget.height()
         )
-        if self.node.widget is not None:
-            height += self.node.widget.height()
-        return width, height
+        return height
+
+    @property
+    def size(self) -> T.Tuple[float, float]:
+        return self.width, self.height
 
     def paint(self,
               painter: QtGui.QPainter,

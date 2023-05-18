@@ -71,6 +71,7 @@ class NodeEditor(QtWidgets.QWidget):
 
     def test_add_elements(self):
         from .model.node import Node
+        from .model.port import Port
 
         n = Node(type_name="Test", name="test1")
         n.create_view(self.scene)
@@ -78,6 +79,10 @@ class NodeEditor(QtWidgets.QWidget):
         text_edit = QtWidgets.QTextEdit()
         n = Node(
             type_name="TextNode", name="test2",
+            input_ports=[
+                Port(name="in1"),
+                Port(name="in2"),
+            ],
             widget=text_edit)
         n.create_view(self.scene)
 
