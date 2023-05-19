@@ -30,13 +30,15 @@ class PortItemSetting:
     radius: float = 5.0
     outline_width: float = 1.0
     color_background: str = "#FFFF8800"
+    color_background_hover: str = "#FFFFF637"
     color_outline: str = "#FF000000"
 
 
 @dataclass
 class PortSetting:
     item_setting: PortItemSetting = PortItemSetting()
-    height: float = 20.0
+    height: float = 30.0
+    label_font_size: float = 12.0
 
 
 @dataclass
@@ -53,3 +55,4 @@ class NodeItemSetting:
     outline_color: str = "#7F000000"  # alpha, R, G, B
     outline_color_selected: str = "#FFFFA637"
     port_setting: PortSetting = PortSetting()
+    space_between_title_and_content: float = 10.0

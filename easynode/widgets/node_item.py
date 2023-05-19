@@ -21,6 +21,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.node = node
         self.init_layout()
         self.setup_pens_and_brushs()
+        self.painted = False
 
     def setup_pens_and_brushs(self):
         QColor = QtGui.QColor
@@ -56,6 +57,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
     def init_content(self):
         self.content_widget = widget = QtWidgets.QWidget()
+        widget.setFixedWidth(self.width)
+        widget.setStyleSheet("background: transparent;")
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
@@ -75,20 +78,24 @@ class NodeItem(QtWidgets.QGraphicsItem):
         out_ports = self.node.output_ports
         ports_widget = QtWidgets.QWidget(parent=self.content_widget)
         ports_layout = QtWidgets.QVBoxLayout()
-        ports_layout.setContentsMargins(0, 0, 0, 0)
+        space = self.setting.space_between_title_and_content
+        ports_layout.setContentsMargins(0, space, 0, 0)
+        ports_layout.setSpacing(0)
         ports_widget.setLayout(ports_layout)
         max_port_idx = max(len(in_ports), len(out_ports))
+        if self.width is None:
+            ports_widget.setFixedWidth(int(self.width))
         for idx in range(max_port_idx):
             port_widget = QtWidgets.QWidget(parent=ports_widget)
             port_layout = QtWidgets.QHBoxLayout()
             port_layout.setContentsMargins(0, 0, 0, 0)
             port_widget.setLayout(port_layout)
+            port_widget.setFixedHeight(self.setting.port_setting.height)
             for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
                 if idx < len(ports):
                     port = ports[idx]
                     port_label = self._get_port_label(port, tp)
                     port_layout.addWidget(port_label)
-                    self._add_port_item(tp, idx)
                 else:
                     port_layout.addStretch()
             ports_layout.addWidget(port_widget)
@@ -97,30 +104,22 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def _get_port_label(
             self, port: "Port", tp: str,
             ) -> QtWidgets.QLabel:
+        align_left = QtCore.Qt.AlignLeft  # type: ignore
+        align_right = QtCore.Qt.AlignRight  # type: ignore
         padding = self.setting.port_setting.item_setting.radius
         port_label = QtWidgets.QLabel(port.name)
         if tp == 'in':
-            port_label.setAlignment(
-                QtCore.Qt.AlignLeft)  # type: ignore
-            port_label.setStyleSheet(f"padding-left: {padding}px")
+            port_label.setAlignment(align_left)
+            port_label.setStyleSheet(
+                f"padding-left: {padding}px; color: white;")
         else:
-            port_label.setAlignment(
-                QtCore.Qt.AlignRight)  # type: ignore
-            port_label.setStyleSheet(f"padding-right: {padding}px")
+            port_label.setAlignment(align_right)
+            port_label.setStyleSheet(
+                f"padding-right: {padding}px; color: white;")
+        font = QtGui.QFont(
+            'Arial', self.setting.port_setting.label_font_size)
+        port_label.setFont(font)
         return port_label
-
-    def _add_port_item(self, tp: str, idx: int):
-        port_item = PortItem(
-            self, self.setting.port_setting.item_setting)
-        y = self.setting.title_area_height
-        y += self.setting.port_setting.item_setting.radius
-        y += self.setting.port_setting.height * idx
-        if tp == 'in':
-            port_item.setPos(0, y)
-        else:
-            # TODO: fix bug
-            print(self.size)
-            port_item.setPos(self.width, y)
 
     def boundingRect(self) -> QtCore.QRectF:
         width, height = self.size
@@ -155,6 +154,9 @@ class NodeItem(QtWidgets.QGraphicsItem):
               option: QtWidgets.QStyleOptionGraphicsItem,
               widget: T.Optional[QtWidgets.QWidget] = None) -> None:
         width, height = self.size
+        if not self.painted:  # first paint
+            self.painted = True
+            self.init_port_items(width)
         title_height = self.setting.title_area_height
         outline_radius = self.setting.outline_radius
         self.paint_title(width, title_height, outline_radius, painter)
@@ -203,3 +205,28 @@ class NodeItem(QtWidgets.QGraphicsItem):
             else self.pen_outline_selected)
         painter.setBrush(QtCore.Qt.NoBrush)  # type: ignore
         painter.drawPath(path_outline)
+
+    def init_port_items(self, width: float):
+        in_ports = self.node.input_ports
+        out_ports = self.node.output_ports
+        max_port_idx = max(len(in_ports), len(out_ports))
+        for idx in range(max_port_idx):
+            for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
+                if idx < len(ports):
+                    self._init_port_item(tp, idx, width)
+                else:
+                    continue
+
+    def _init_port_item(
+            self, tp: str, idx: int, width: float):
+        port_item = PortItem(
+            self, self.setting.port_setting.item_setting)
+        y = self.setting.title_area_height
+        y += self.setting.space_between_title_and_content
+        y += self.setting.port_setting.item_setting.radius
+        y += self.setting.port_setting.item_setting.outline_width
+        y += self.setting.port_setting.height * idx
+        if tp == 'in':
+            port_item.setPos(0, y)
+        else:
+            port_item.setPos(width, y)

@@ -73,15 +73,38 @@ class NodeEditor(QtWidgets.QWidget):
         from .model.node import Node
         from .model.port import Port
 
-        n = Node(type_name="Test", name="test1")
-        n.create_view(self.scene)
+        # for i in range(100):
+        #     n = Node(
+        #         type_name="Test", name="test1",
+        #         input_ports=[Port(name="in1")],
+        #         output_ports=[Port(name="out1")])
+        #     n.create_item(self.scene)
+        #     n.item.setPos(100 * i, 100 * i)
+        n = Node(
+            type_name="Test", name="test1",
+            input_ports=[Port(name="in1")],
+            output_ports=[Port(name="out1")])
+        n.create_item(self.scene)
+
+        # n = Node(
+        #     type_name="Test",
+        #     name="test2_loooooooooooooooooonnnnngggggg_title",
+        # )
+        # n.create_item(self.scene)
 
         text_edit = QtWidgets.QTextEdit()
+        text_edit.setFixedSize(300, 200)
         n = Node(
             type_name="TextNode", name="test2",
             input_ports=[
                 Port(name="in1"),
                 Port(name="in2"),
+                Port(name="in3"),
+                Port(name="in4"),
+                Port(name="in5"),
+                Port(name="in6"),
+                Port(name="in7"),
+                Port(name="in8"),
             ],
             output_ports=[
                 Port(name="out1"),
@@ -89,7 +112,7 @@ class NodeEditor(QtWidgets.QWidget):
                 Port(name="out3"),
             ],
             widget=text_edit)
-        n.create_view(self.scene)
+        n.create_item(self.scene)
 
     def load_style_sheet(self, path: str):
         with open(path, "r") as f:

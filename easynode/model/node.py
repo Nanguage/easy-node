@@ -28,13 +28,15 @@ class Node(object):
         self.input_ports = input_ports
         self.output_ports = output_ports
         self.widget = widget
+        self.item = None
 
     @property
     def title(self) -> str:
         return self.type_name + ": " + self.name
 
-    def create_view(
+    def create_item(
             self, scene: "GraphicsScene",
             setting: T.Optional[NodeItemSetting] = None):
-        view = NodeItem(None, self, setting)
-        scene.addItem(view)
+        item = NodeItem(None, self, setting)
+        scene.addItem(item)
+        self.item = item
