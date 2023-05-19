@@ -1,7 +1,15 @@
+import typing as T
+
+if T.TYPE_CHECKING:
+    from .node import Node
+    from ..widgets.port_item import PortItem
+
 
 class Port():
     def __init__(self, name: str) -> None:
         self.name = name
+        self.node: T.Optional["Node"] = None
+        self.item: T.Optional["PortItem"] = None
 
 
 class DataPort(Port):

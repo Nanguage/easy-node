@@ -72,6 +72,7 @@ class NodeEditor(QtWidgets.QWidget):
     def test_add_elements(self):
         from .model.node import Node
         from .model.port import Port
+        from .model.edge import Edge
 
         # for i in range(100):
         #     n = Node(
@@ -80,11 +81,6 @@ class NodeEditor(QtWidgets.QWidget):
         #         output_ports=[Port(name="out1")])
         #     n.create_item(self.scene)
         #     n.item.setPos(100 * i, 100 * i)
-        n = Node(
-            type_name="Test", name="test1",
-            input_ports=[Port(name="in1")],
-            output_ports=[Port(name="out1")])
-        n.create_item(self.scene)
 
         # n = Node(
         #     type_name="Test",
@@ -94,7 +90,7 @@ class NodeEditor(QtWidgets.QWidget):
 
         text_edit = QtWidgets.QTextEdit()
         text_edit.setFixedSize(300, 200)
-        n = Node(
+        n1 = Node(
             type_name="TextNode", name="test2",
             input_ports=[
                 Port(name="in1"),
@@ -112,7 +108,17 @@ class NodeEditor(QtWidgets.QWidget):
                 Port(name="out3"),
             ],
             widget=text_edit)
-        n.create_item(self.scene)
+        n1.create_item(self.scene)
+
+        n2 = Node(
+            type_name="Test", name="test1",
+            input_ports=[Port(name="in1")],
+            output_ports=[Port(name="out1")])
+        n2.create_item(self.scene)
+        n2.item.setPos(500, 300)
+
+        e1 = Edge(n1.output_ports[2], n2.input_ports[0])
+        e1.create_item(self.scene)
 
     def load_style_sheet(self, path: str):
         with open(path, "r") as f:

@@ -213,12 +213,14 @@ class NodeItem(QtWidgets.QGraphicsItem):
         for idx in range(max_port_idx):
             for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
                 if idx < len(ports):
-                    self._init_port_item(tp, idx, width)
+                    port = ports[idx]
+                    port.item = self._init_port_item(tp, idx, width)
                 else:
                     continue
 
     def _init_port_item(
-            self, tp: str, idx: int, width: float):
+            self, tp: str, idx: int, width: float
+            ) -> "PortItem":
         port_item = PortItem(
             self, self.setting.port_setting.item_setting)
         y = self.setting.title_area_height
@@ -230,3 +232,4 @@ class NodeItem(QtWidgets.QGraphicsItem):
             port_item.setPos(0, y)
         else:
             port_item.setPos(width, y)
+        return port_item

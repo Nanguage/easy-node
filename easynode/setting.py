@@ -56,3 +56,19 @@ class NodeItemSetting:
     outline_color_selected: str = "#FFFFA637"
     port_setting: PortSetting = PortSetting()
     space_between_title_and_content: float = 10.0
+
+
+@dataclass
+class EdgeItemSetting:
+    color: str = "#FFFFFFFF"
+    color_selected: str = "#FFFFA637"
+    width: float = 2.0
+    style: str = "bazel"  # "bazel" or "direct"
+
+
+@dataclass
+class EditorSetting:
+    graphics_scene_setting: GraphicsSceneSetting = GraphicsSceneSetting()
+    graphics_view_setting: GraphicsViewSetting = GraphicsViewSetting()
+    node_item_setting: NodeItemSetting = NodeItemSetting()
+    edge_item_setting: EdgeItemSetting = EdgeItemSetting()
