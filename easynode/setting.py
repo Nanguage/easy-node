@@ -62,8 +62,11 @@ class NodeItemSetting:
 class EdgeItemSetting:
     color: str = "#FFFFFFFF"
     color_selected: str = "#FFFFA637"
+    style: str = "dotted"  # solid, dashed, dotted
+    style_selected: str = "solid"
     width: float = 2.0
-    style: str = "bazel"  # "bazel" or "direct"
+    width_selected: float = 2.0
+    bazel: bool = True
 
 
 @dataclass

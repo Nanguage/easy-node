@@ -25,14 +25,25 @@ class EdgeItem(QtWidgets.QGraphicsPathItem):
         self._pen = QtGui.QPen(
             QtGui.QColor(self.setting.color),
             self.setting.width)
+        self._set_pen_style(self._pen, self.setting.style)
         self._pen_selected = QtGui.QPen(
             QtGui.QColor(self.setting.color_selected),
-            self.setting.width)
+            self.setting.width_selected)
+        self._set_pen_style(self._pen_selected, self.setting.style_selected)
         self._brush = QtCore.Qt.NoBrush
 
+    @staticmethod
+    def _set_pen_style(pen: QtGui.QPen, style: str):
+        if style == "dashed":
+            pen.setStyle(QtCore.Qt.DashLine)  # type: ignore
+        elif style == "dotted":
+            pen.setStyle(QtCore.Qt.DotLine)  # type: ignore
+        else:
+            pen.setStyle(QtCore.Qt.SolidLine)  # type: ignore
+
     def update_path(self):
-        style = self.setting.style
-        if style == "direct":
+        is_bazel = self.setting.bazel
+        if not is_bazel:
             self.update_path_direct()
         else:
             self.update_path_bazel()
