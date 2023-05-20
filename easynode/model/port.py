@@ -10,6 +10,7 @@ class Port():
         self.name = name
         self.node: T.Optional["Node"] = None
         self.item: T.Optional["PortItem"] = None
+        self.type: T.Optional[str] = None
 
 
 class DataPort(Port):

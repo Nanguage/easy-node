@@ -39,17 +39,37 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
-            self.middleMouseButtonPress(event)
+            self.middle_mouse_button_press(event)
+        elif event.button() == QtCore.Qt.LeftButton:  # type: ignore
+            self.left_mouse_button_press(event)
+        elif event.button() == QtCore.Qt.RightButton:  # type: ignore
+            self.right_mouse_button_press(event)
         else:
             super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
-            self.middleMouseButtonRelease(event)
+            self.middle_mouse_button_release(event)
+        elif event.button() == QtCore.Qt.LeftButton:  # type: ignore
+            self.left_mouse_button_release(event)
+        elif event.button() == QtCore.Qt.RightButton:  # type: ignore
+            self.right_mouse_button_release(event)
         else:
             return super().mouseReleaseEvent(event)
 
-    def middleMouseButtonPress(self, event: QtGui.QMouseEvent):
+    def left_mouse_button_press(self, event: QtGui.QMouseEvent):
+        super().mousePressEvent(event)
+
+    def left_mouse_button_release(self, event: QtGui.QMouseEvent):
+        super().mouseReleaseEvent(event)
+
+    def right_mouse_button_press(self, event: QtGui.QMouseEvent):
+        super().mousePressEvent(event)
+
+    def right_mouse_button_release(self, event: QtGui.QMouseEvent):
+        super().mouseReleaseEvent(event)
+
+    def middle_mouse_button_press(self, event: QtGui.QMouseEvent):
         fake_release_midele = QtGui.QMouseEvent(
             QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
             event.screenPos(), QtCore.Qt.MiddleButton,  # type: ignore
@@ -62,13 +82,20 @@ class GraphicsView(QtWidgets.QGraphicsView):
             event.modifiers())
         super().mousePressEvent(fake_press_left)
 
-    def middleMouseButtonRelease(self, event: QtGui.QMouseEvent):
+    def middle_mouse_button_release(self, event: QtGui.QMouseEvent):
         fake_release_left = QtGui.QMouseEvent(
             QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
             event.screenPos(), QtCore.Qt.LeftButton,  # type: ignore
             QtCore.Qt.NoButton, event.modifiers())  # type: ignore
         super().mouseReleaseEvent(fake_release_left)
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+
+    def get_item_at_click(
+            self, event: QtGui.QMouseEvent
+            ) -> T.Optional[QtWidgets.QGraphicsItem]:
+        pos = event.pos()
+        obj = self.itemAt(pos)
+        return obj
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Control:  # type: ignore

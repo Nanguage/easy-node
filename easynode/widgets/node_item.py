@@ -211,24 +211,25 @@ class NodeItem(QtWidgets.QGraphicsItem):
         out_ports = self.node.output_ports
         max_port_idx = max(len(in_ports), len(out_ports))
         for idx in range(max_port_idx):
-            for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
+            for ports in [in_ports, out_ports]:
                 if idx < len(ports):
                     port = ports[idx]
-                    port.item = self._init_port_item(tp, idx, width)
+                    port.item = self._init_port_item(
+                        port, idx, width)
                 else:
                     continue
 
     def _init_port_item(
-            self, tp: str, idx: int, width: float
+            self, port: "Port", idx: int, width: float
             ) -> "PortItem":
         port_item = PortItem(
-            self, self.setting.port_setting.item_setting)
+            self, port, self.setting.port_setting.item_setting)
         y = self.setting.title_area_height
         y += self.setting.space_between_title_and_content
         y += self.setting.port_setting.item_setting.radius
         y += self.setting.port_setting.item_setting.outline_width
         y += self.setting.port_setting.height * idx
-        if tp == 'in':
+        if port.type == 'in':
             port_item.setPos(0, y)
         else:
             port_item.setPos(width, y)

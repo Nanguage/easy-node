@@ -7,19 +7,15 @@ if T.TYPE_CHECKING:
     from ..model import Edge  # type: ignore
 
 
-class EdgeItem(QtWidgets.QGraphicsPathItem):
+class EdgeItemBase(QtWidgets.QGraphicsPathItem):
     def __init__(
-            self, parent: QtWidgets.QWidget,
-            edge: "Edge",
+            self, parent: T.Optional[QtWidgets.QWidget] = None,
             setting: T.Optional[EdgeItemSetting] = None):
-        super().__init__(parent=parent)
+        super().__init__(parent)
         if setting is None:
             setting = EdgeItemSetting()
         self.setting = setting
-        self.edge = edge
         self.setup_pens_and_brushs()
-        self.setFlag(
-            QtWidgets.QGraphicsItem.ItemIsSelectable)  # type: ignore
 
     def setup_pens_and_brushs(self):
         self._pen = QtGui.QPen(
@@ -41,6 +37,14 @@ class EdgeItem(QtWidgets.QGraphicsPathItem):
         else:
             pen.setStyle(QtCore.Qt.SolidLine)  # type: ignore
 
+    @property
+    def source_pos(self) -> QtCore.QPointF:
+        pass
+
+    @property
+    def target_pos(self) -> QtCore.QPointF:
+        pass
+
     def update_path(self):
         is_bazel = self.setting.bazel
         if not is_bazel:
@@ -49,16 +53,16 @@ class EdgeItem(QtWidgets.QGraphicsPathItem):
             self.update_path_bazel()
 
     def update_path_direct(self):
-        source_pos = self.edge.source_port.item.scenePos()
-        target_pos = self.edge.target_port.item.scenePos()
+        source_pos = self.source_pos
+        target_pos = self.target_pos
         path = QtGui.QPainterPath(source_pos)
         path.lineTo(target_pos)
         self.setPath(path)
 
     def update_path_bazel(self):
         path = QtGui.QPainterPath()
-        s = self.edge.source_port.item.scenePos()
-        t = self.edge.target_port.item.scenePos()
+        s = self.source_pos
+        t = self.target_pos
         dist = (t.x() - s.x()) * 0.5
         if s.x() > t.x():
             dist *= -1
@@ -83,3 +87,22 @@ class EdgeItem(QtWidgets.QGraphicsPathItem):
             painter.setPen(self._pen)
         painter.setBrush(self._brush)
         painter.drawPath(self.path())
+
+
+class EdgeItem(EdgeItemBase):
+    def __init__(
+            self, parent: QtWidgets.QWidget,
+            edge: "Edge",
+            setting: T.Optional[EdgeItemSetting] = None):
+        super().__init__(parent, setting)
+        self.edge = edge
+        self.setFlag(
+            QtWidgets.QGraphicsItem.ItemIsSelectable)  # type: ignore
+
+    @property
+    def source_pos(self) -> QtCore.QPointF:
+        return self.edge.source_port.item.scenePos()
+
+    @property
+    def target_pos(self) -> QtCore.QPointF:
+        return self.edge.target_port.item.scenePos()

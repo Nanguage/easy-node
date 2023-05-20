@@ -3,14 +3,19 @@ from qtpy import QtWidgets, QtGui, QtCore
 
 from ..setting import PortItemSetting  # type: ignore
 
+if T.TYPE_CHECKING:
+    from ..model.port import Port  # type: ignore
+
 
 class PortItem(QtWidgets.QGraphicsItem):
     def __init__(
             self,
             parent: T.Optional[QtWidgets.QWidget] = None,
+            port: "Port" = None,
             setting: T.Optional["PortItemSetting"] = None
             ) -> None:
         super().__init__(parent)
+        self.port = port
         if setting is None:
             setting = PortItemSetting()
         self.setting = setting
@@ -32,11 +37,20 @@ class PortItem(QtWidgets.QGraphicsItem):
 
     def hoverEnterEvent(self, event) -> None:
         self.hovered = True
+        self.setZValue(1)
+        self.parentItem().setZValue(1)
         self.update()
 
     def hoverLeaveEvent(self, event) -> None:
         self.hovered = False
+        self.setZValue(0)
+        self.parentItem().setZValue(0)
         self.update()
+
+    def mousePressEvent(
+            self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
+        print(self)
+        super().mousePressEvent(event)
 
     def paint(self,
               painter: QtGui.QPainter,
