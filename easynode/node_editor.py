@@ -5,7 +5,7 @@ from qtpy import QtWidgets
 
 from .widgets.scene import GraphicsScene
 from .widgets.view import GraphicsView
-from .setting import GraphicsViewSetting, GraphicsSceneSetting
+from .setting import EditorSetting
 
 
 HERE = osp.dirname(osp.abspath(__file__))
@@ -15,12 +15,12 @@ class NodeEditor(QtWidgets.QWidget):
     def __init__(
             self,
             parent: T.Optional[QtWidgets.QWidget] = None,
-            graphics_scene_setting: T.Optional[GraphicsSceneSetting] = None,
-            graphics_view_setting: T.Optional[GraphicsViewSetting] = None,
+            setting: T.Optional[EditorSetting] = None,
             ) -> None:
         super().__init__(parent)
-        self.graphics_scene_setting = graphics_scene_setting
-        self.graphics_view_setting = graphics_view_setting
+        if setting is None:
+            setting = EditorSetting()
+        self.setting = setting
         self.init_layout()
         self.load_style_sheet(osp.join(HERE, "qss/node.qss"))
 
@@ -28,12 +28,14 @@ class NodeEditor(QtWidgets.QWidget):
         self.resize(800, 600)
         self.setWindowTitle("EasyNode")
 
-        self.scene = GraphicsScene(self, self.graphics_scene_setting)
+        self.scene = GraphicsScene(
+            self, self.setting.graphics_scene_setting)
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.view = GraphicsView(
-            self.scene, self, self.graphics_view_setting)
+            self.scene, self, self.setting.graphics_view_setting,
+            self.setting.edge_item_setting)
         self.layout.addWidget(self.view)
 
         # self.try_add_items()

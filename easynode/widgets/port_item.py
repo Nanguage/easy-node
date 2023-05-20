@@ -47,11 +47,6 @@ class PortItem(QtWidgets.QGraphicsItem):
         self.parentItem().setZValue(0)
         self.update()
 
-    def mousePressEvent(
-            self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
-        print(self)
-        super().mousePressEvent(event)
-
     def paint(self,
               painter: QtGui.QPainter,
               option: QtWidgets.QStyleOptionGraphicsItem,

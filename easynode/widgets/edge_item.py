@@ -4,12 +4,12 @@ from qtpy import QtWidgets, QtGui, QtCore
 from ..setting import EdgeItemSetting  # type: ignore
 
 if T.TYPE_CHECKING:
-    from ..model import Edge  # type: ignore
+    from ..model import Edge, Port  # type: ignore
 
 
 class EdgeItemBase(QtWidgets.QGraphicsPathItem):
     def __init__(
-            self, parent: T.Optional[QtWidgets.QWidget] = None,
+            self, parent: T.Optional[QtWidgets.QGraphicsItem] = None,
             setting: T.Optional[EdgeItemSetting] = None):
         super().__init__(parent)
         if setting is None:
@@ -91,8 +91,8 @@ class EdgeItemBase(QtWidgets.QGraphicsPathItem):
 
 class EdgeItem(EdgeItemBase):
     def __init__(
-            self, parent: QtWidgets.QWidget,
-            edge: "Edge",
+            self, edge: "Edge",
+            parent: T.Optional[QtWidgets.QGraphicsItem] = None,
             setting: T.Optional[EdgeItemSetting] = None):
         super().__init__(parent, setting)
         self.edge = edge
@@ -106,3 +106,28 @@ class EdgeItem(EdgeItemBase):
     @property
     def target_pos(self) -> QtCore.QPointF:
         return self.edge.target_port.item.scenePos()
+
+
+class EdgeDragItem(EdgeItemBase):
+    def __init__(
+            self, fixed_port: "Port",
+            parent: QtWidgets.QGraphicsItem,
+            setting: T.Optional[EdgeItemSetting] = None
+            ) -> None:
+        super().__init__(parent, setting)
+        self.fixed_port = fixed_port
+        self.movable_pos = fixed_port.item.scenePos()
+
+    @property
+    def source_pos(self) -> QtCore.QPointF:
+        if self.fixed_port.type == "in":
+            return self.movable_pos
+        else:
+            return self.fixed_port.item.scenePos()
+
+    @property
+    def target_pos(self) -> QtCore.QPointF:
+        if self.fixed_port.type == "in":
+            return self.fixed_port.item.scenePos()
+        else:
+            return self.movable_pos

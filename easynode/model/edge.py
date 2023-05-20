@@ -20,6 +20,6 @@ class Edge:
     def create_item(
             self, scene: "GraphicsScene",
             setting: T.Optional[EdgeItemSetting] = None):
-        item = EdgeItem(None, self, setting)
+        item = EdgeItem(self, None, setting)
         scene.addItem(item)
         self.item = item

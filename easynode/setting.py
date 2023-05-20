@@ -27,7 +27,7 @@ class GraphicsViewSetting:
 
 @dataclass
 class PortItemSetting:
-    radius: float = 5.0
+    radius: float = 8.0
     outline_width: float = 1.0
     color_background: str = "#FFFF8800"
     color_background_hover: str = "#FFFFF637"

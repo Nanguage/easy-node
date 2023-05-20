@@ -2,6 +2,8 @@ import typing as T
 
 from qtpy import QtWidgets, QtGui, QtCore
 from ..setting import GraphicsViewSetting  # type: ignore
+from .port_item import PortItem
+from .edge_item import EdgeDragItem, EdgeItemSetting
 
 
 class GraphicsView(QtWidgets.QGraphicsView):
@@ -9,15 +11,22 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self,
             scene: QtWidgets.QGraphicsScene,
             parent: T.Optional[QtWidgets.QWidget] = None,
-            setting: T.Optional[GraphicsViewSetting] = None):
+            setting: T.Optional[GraphicsViewSetting] = None,
+            edge_item_setting: T.Optional["EdgeItemSetting"] = None,
+            ) -> None:
         super().__init__(parent)
         if setting is None:
             setting = GraphicsViewSetting()
         self.setting = setting
+        if edge_item_setting is None:
+            edge_item_setting = EdgeItemSetting()
+        self.edge_item_setting = edge_item_setting
         self.setScene(scene)
         self.setup_layout()
         self.current_zoom = 5
         self.zoom_mode = False
+        self.edge_drag_mode = False
+        self._edge_drag_item: T.Optional[EdgeDragItem] = None
 
     def setup_layout(self):
         x, y = self.setting.default_slider_position
@@ -57,10 +66,29 @@ class GraphicsView(QtWidgets.QGraphicsView):
         else:
             return super().mouseReleaseEvent(event)
 
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
+        if self.edge_drag_mode:
+            assert self._edge_drag_item is not None
+            pos = self.mapToScene(event.pos())
+            self._edge_drag_item.movable_pos = pos
+            self.scene().update()
+        return super().mouseMoveEvent(event)
+
     def left_mouse_button_press(self, event: QtGui.QMouseEvent):
+        item = self.get_item_at_click(event)
+        if isinstance(item, PortItem):
+            self.edge_drag_mode = True
+            self._edge_drag_item = EdgeDragItem(
+                item.port, None, self.edge_item_setting)
+            self.scene().addItem(self._edge_drag_item)
         super().mousePressEvent(event)
 
     def left_mouse_button_release(self, event: QtGui.QMouseEvent):
+        if self.edge_drag_mode:
+            self.edge_drag_mode = False
+            assert self._edge_drag_item is not None
+            self.scene().removeItem(self._edge_drag_item)
+            self._edge_drag_item = None
         super().mouseReleaseEvent(event)
 
     def right_mouse_button_press(self, event: QtGui.QMouseEvent):
@@ -110,13 +138,12 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         if not self.zoom_mode:
             return super().wheelEvent(event)
-        zoom_out_factor = 1 / self.setting.zoom_in_factor
         zoom_range = self.setting.zoom_range
         if event.angleDelta().y() > 0:
             zoom_factor = self.setting.zoom_in_factor
             self.current_zoom += self.setting.zoom_step
         else:
-            zoom_factor = zoom_out_factor
+            zoom_factor = 1 / self.setting.zoom_in_factor
             self.current_zoom -= self.setting.zoom_step
         clamped = False
         if self.current_zoom < zoom_range[0]:
