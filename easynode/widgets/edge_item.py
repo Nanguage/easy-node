@@ -153,3 +153,11 @@ class EdgeDragItem(EdgeItemBase):
     def boundingRect(self) -> QtCore.QRectF:
         return QtCore.QRectF(
             self.source_pos, self.target_pos).normalized()
+
+    def create_edge(self, movable_port: "Port") -> "Edge":
+        from ..model import Edge  # type: ignore
+        if self.fixed_port.type == "in":
+            edge = Edge(movable_port, self.fixed_port)
+        else:
+            edge = Edge(self.fixed_port, movable_port)
+        return edge

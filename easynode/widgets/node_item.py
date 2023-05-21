@@ -25,13 +25,13 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.setZValue(1)
 
     def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
-        child_item = self.itemAt(event.scenePos())
+        child_item = self.get_item_at(event.scenePos())
         if isinstance(child_item, PortItem):
             child_item.mousePressEvent(event)
         else:
             super().mousePressEvent(event)
 
-    def itemAt(
+    def get_item_at(
             self, pos: QtCore.QPointF
             ) -> T.Optional[QtWidgets.QGraphicsItem]:
         return self.scene().itemAt(

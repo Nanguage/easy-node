@@ -75,3 +75,4 @@ class EditorSetting:
     graphics_view_setting: GraphicsViewSetting = GraphicsViewSetting()
     node_item_setting: NodeItemSetting = NodeItemSetting()
     edge_item_setting: EdgeItemSetting = EdgeItemSetting()
+    edge_drag_item_setting: EdgeItemSetting = EdgeItemSetting()

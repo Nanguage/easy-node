@@ -35,7 +35,8 @@ class NodeEditor(QtWidgets.QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.view = GraphicsView(
             self.scene, self, self.setting.graphics_view_setting,
-            self.setting.edge_item_setting)
+            self.setting.edge_item_setting,
+            self.setting.edge_drag_item_setting)
         self.layout.addWidget(self.view)
 
         # self.try_add_items()

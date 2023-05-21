@@ -13,6 +13,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             parent: T.Optional[QtWidgets.QWidget] = None,
             setting: T.Optional[GraphicsViewSetting] = None,
             edge_item_setting: T.Optional["EdgeItemSetting"] = None,
+            edge_drag_item_setting: T.Optional["EdgeItemSetting"] = None,
             ) -> None:
         super().__init__(parent)
         if setting is None:
@@ -21,6 +22,9 @@ class GraphicsView(QtWidgets.QGraphicsView):
         if edge_item_setting is None:
             edge_item_setting = EdgeItemSetting()
         self.edge_item_setting = edge_item_setting
+        if edge_drag_item_setting is None:
+            edge_drag_item_setting = EdgeItemSetting()
+        self.edge_drag_item_setting = edge_drag_item_setting
         self.setScene(scene)
         self.setup_layout()
         self.current_zoom = 5
@@ -76,11 +80,11 @@ class GraphicsView(QtWidgets.QGraphicsView):
         return super().mouseMoveEvent(event)
 
     def left_mouse_button_press(self, event: QtGui.QMouseEvent):
-        item = self.get_item_at_click(event)
+        item = self.itemAt(event.pos())
         if isinstance(item, PortItem):
             self.edge_drag_mode = True
             self._edge_drag_item = EdgeDragItem(
-                item.port, None, self.edge_item_setting)
+                item.port, None, self.edge_drag_item_setting)
             self.scene().addItem(self._edge_drag_item)
         super().mousePressEvent(event)
 
@@ -88,6 +92,13 @@ class GraphicsView(QtWidgets.QGraphicsView):
         if self.edge_drag_mode:
             self.edge_drag_mode = False
             assert self._edge_drag_item is not None
+            stop_item = self.itemAt(event.pos())
+            if isinstance(stop_item, PortItem):
+                new_edge = self._edge_drag_item.create_edge(
+                    stop_item.port)
+                new_edge.create_item(
+                    self.scene(), self.edge_item_setting
+                )
             self.scene().removeItem(self._edge_drag_item)
             self._edge_drag_item = None
         super().mouseReleaseEvent(event)
@@ -118,13 +129,6 @@ class GraphicsView(QtWidgets.QGraphicsView):
             QtCore.Qt.NoButton, event.modifiers())  # type: ignore
         super().mouseReleaseEvent(fake_release_left)
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-
-    def get_item_at_click(
-            self, event: QtGui.QMouseEvent
-            ) -> T.Optional[QtWidgets.QGraphicsItem]:
-        pos = event.pos()
-        obj = self.itemAt(pos)
-        return obj
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Control:  # type: ignore
