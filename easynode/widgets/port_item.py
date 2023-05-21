@@ -37,14 +37,10 @@ class PortItem(QtWidgets.QGraphicsItem):
 
     def hoverEnterEvent(self, event) -> None:
         self.hovered = True
-        self.setZValue(1)
-        self.parentItem().setZValue(1)
         self.update()
 
     def hoverLeaveEvent(self, event) -> None:
         self.hovered = False
-        self.setZValue(0)
-        self.parentItem().setZValue(0)
         self.update()
 
     def paint(self,

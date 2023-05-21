@@ -69,8 +69,9 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         if self.edge_drag_mode:
             assert self._edge_drag_item is not None
-            pos = self.mapToScene(event.pos())
-            self._edge_drag_item.movable_pos = pos
+            pos = event.pos()
+            scene_pos = self.mapToScene(pos)
+            self._edge_drag_item.movable_pos = scene_pos
             self.scene().update()
         return super().mouseMoveEvent(event)
 

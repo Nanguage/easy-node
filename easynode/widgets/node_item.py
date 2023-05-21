@@ -22,6 +22,20 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.init_layout()
         self.setup_pens_and_brushs()
         self.painted = False
+        self.setZValue(1)
+
+    def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+        child_item = self.itemAt(event.scenePos())
+        if isinstance(child_item, PortItem):
+            child_item.mousePressEvent(event)
+        else:
+            super().mousePressEvent(event)
+
+    def itemAt(
+            self, pos: QtCore.QPointF
+            ) -> T.Optional[QtWidgets.QGraphicsItem]:
+        return self.scene().itemAt(
+            pos.x(), pos.y(), QtGui.QTransform())
 
     def setup_pens_and_brushs(self):
         QColor = QtGui.QColor

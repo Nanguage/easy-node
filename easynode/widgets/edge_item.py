@@ -101,11 +101,27 @@ class EdgeItem(EdgeItemBase):
 
     @property
     def source_pos(self) -> QtCore.QPointF:
-        return self.edge.source_port.item.scenePos()
+        item = self.edge.source_port.item
+        assert item is not None
+        return item.scenePos()
 
     @property
     def target_pos(self) -> QtCore.QPointF:
-        return self.edge.target_port.item.scenePos()
+        item = self.edge.target_port.item
+        assert item is not None
+        return item.scenePos()
+
+    def paint(
+            self,
+            painter: QtGui.QPainter,
+            option: QtWidgets.QStyleOptionGraphicsItem,
+            widget: T.Optional[QtWidgets.QWidget] = None
+            ) -> None:
+        if self.edge.source_port.item is None:
+            return
+        if self.edge.target_port.item is None:
+            return
+        super().paint(painter, option, widget)
 
 
 class EdgeDragItem(EdgeItemBase):
@@ -121,13 +137,19 @@ class EdgeDragItem(EdgeItemBase):
     @property
     def source_pos(self) -> QtCore.QPointF:
         if self.fixed_port.type == "in":
-            return self.movable_pos
+            pos = self.movable_pos
         else:
-            return self.fixed_port.item.scenePos()
+            pos = self.fixed_port.item.scenePos()
+        return pos
 
     @property
     def target_pos(self) -> QtCore.QPointF:
         if self.fixed_port.type == "in":
-            return self.fixed_port.item.scenePos()
+            pos = self.fixed_port.item.scenePos()
         else:
-            return self.movable_pos
+            pos = self.movable_pos
+        return pos
+
+    def boundingRect(self) -> QtCore.QRectF:
+        return QtCore.QRectF(
+            self.source_pos, self.target_pos).normalized()
