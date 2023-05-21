@@ -157,7 +157,13 @@ class EdgeDragItem(EdgeItemBase):
     def create_edge(self, movable_port: "Port") -> "Edge":
         from ..model import Edge  # type: ignore
         if self.fixed_port.type == "in":
+            if movable_port.type == "in":
+                raise ValueError("Can't connect in to in")
             edge = Edge(movable_port, self.fixed_port)
         else:
+            if movable_port.type == "out":
+                raise ValueError("Can't connect out to out")
             edge = Edge(self.fixed_port, movable_port)
+        if edge.source_port.node is edge.target_port.node:
+            raise ValueError("Can't connect in the same node")
         return edge

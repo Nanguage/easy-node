@@ -94,11 +94,14 @@ class GraphicsView(QtWidgets.QGraphicsView):
             assert self._edge_drag_item is not None
             stop_item = self.itemAt(event.pos())
             if isinstance(stop_item, PortItem):
-                new_edge = self._edge_drag_item.create_edge(
-                    stop_item.port)
-                new_edge.create_item(
-                    self.scene(), self.edge_item_setting
-                )
+                try:
+                    new_edge = self._edge_drag_item.create_edge(
+                        stop_item.port)
+                    new_edge.create_item(
+                        self.scene(), self.edge_item_setting
+                    )
+                except Exception as e:
+                    print(e)
             self.scene().removeItem(self._edge_drag_item)
             self._edge_drag_item = None
         super().mouseReleaseEvent(event)
