@@ -32,6 +32,18 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
 
+    @property
+    def edge_drag_mode(self) -> bool:
+        return self._edge_drag_mode
+
+    @edge_drag_mode.setter
+    def edge_drag_mode(self, value: bool) -> None:
+        self._edge_drag_mode = value
+        if value:
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+        else:
+            self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
+
     def setup_layout(self):
         x, y = self.setting.default_slider_position
         self.verticalScrollBar().setSliderPosition(y)

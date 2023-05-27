@@ -9,6 +9,7 @@ from .setting import EditorSetting
 
 
 HERE = osp.dirname(osp.abspath(__file__))
+DEFAULT_STYLE_SHEET = osp.join(HERE, "qss/default.qss")
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -16,13 +17,16 @@ class NodeEditor(QtWidgets.QWidget):
             self,
             parent: T.Optional[QtWidgets.QWidget] = None,
             setting: T.Optional[EditorSetting] = None,
+            style_sheet: T.Optional[str] = None,
             ) -> None:
         super().__init__(parent)
         if setting is None:
             setting = EditorSetting()
         self.setting = setting
         self.init_layout()
-        self.load_style_sheet(osp.join(HERE, "qss/node.qss"))
+        if style_sheet is None:
+            style_sheet = DEFAULT_STYLE_SHEET
+        self.load_style_sheet(style_sheet)
 
     def init_layout(self):
         self.resize(800, 600)
@@ -38,90 +42,6 @@ class NodeEditor(QtWidgets.QWidget):
             self.setting.edge_item_setting,
             self.setting.edge_drag_item_setting)
         self.layout.addWidget(self.view)
-
-        # self.try_add_items()
-        self.test_add_elements()
-
-    def try_add_items(self):
-        # for learn API
-        from qtpy.QtGui import QBrush, QPen, QColor, QFont
-        from qtpy.QtCore import Qt
-        green_brush = QBrush(Qt.green)
-        outline_pen = QPen("#ffffff")
-        outline_pen.setWidth(2)
-        rect = self.scene.addRect(20, 20, 90, 90, outline_pen, green_brush)
-        rect.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
-
-        text = self.scene.addText("This is awesome text!", QFont("Ubuntu"))
-        text.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
-        text.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
-        text.setDefaultTextColor(QColor.fromRgbF(1.0, 1.0, 1.0))
-
-        widget1 = QtWidgets.QPushButton("Hello!")
-        proxy1 = self.scene.addWidget(widget1)
-        proxy1.setPos(30, 30)
-
-        widget2 = QtWidgets.QTextEdit()
-        proxy2 = self.scene.addWidget(widget2)
-        proxy2.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
-        proxy2.setPos(30, 200)
-
-        line_pen = QPen("#000000")
-        line_pen.setWidth(5)
-        line = self.scene.addLine(200, 10, 500, 100, line_pen)
-        line.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
-        line.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
-
-    def test_add_elements(self):
-        from .model.node import Node
-        from .model.port import Port
-        from .model.edge import Edge
-
-        # for i in range(100):
-        #     n = Node(
-        #         type_name="Test", name="test1",
-        #         input_ports=[Port(name="in1")],
-        #         output_ports=[Port(name="out1")])
-        #     n.create_item(self.scene)
-        #     n.item.setPos(100 * i, 100 * i)
-
-        # n = Node(
-        #     type_name="Test",
-        #     name="test2_loooooooooooooooooonnnnngggggg_title",
-        # )
-        # n.create_item(self.scene)
-
-        text_edit = QtWidgets.QTextEdit()
-        text_edit.setFixedSize(300, 200)
-        n1 = Node(
-            type_name="TextNode", name="test2",
-            input_ports=[
-                Port(name="in1"),
-                Port(name="in2"),
-                Port(name="in3"),
-                Port(name="in4"),
-                Port(name="in5"),
-                Port(name="in6"),
-                Port(name="in7"),
-                Port(name="in8"),
-            ],
-            output_ports=[
-                Port(name="out1"),
-                Port(name="out2"),
-                Port(name="out3"),
-            ],
-            widget=text_edit)
-        n1.create_item(self.scene)
-
-        n2 = Node(
-            type_name="Test", name="test1",
-            input_ports=[Port(name="in1")],
-            output_ports=[Port(name="out1")])
-        n2.create_item(self.scene)
-        n2.item.setPos(500, 300)
-
-        e1 = Edge(n1.output_ports[2], n2.input_ports[0])
-        e1.create_item(self.scene)
 
     def load_style_sheet(self, path: str):
         with open(path, "r") as f:

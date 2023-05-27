@@ -1,0 +1,3 @@
+QGraphicsView {
+    selection-background-color: rgb(20, 100, 200);
+}
