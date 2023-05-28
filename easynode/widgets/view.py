@@ -24,6 +24,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.zoom_mode = False
         self.edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
+        self._clicked_port_item: T.Optional[PortItem] = None
 
     def scene(self) -> "GraphicsScene":
         return super().scene()
@@ -80,24 +81,32 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         if self.edge_drag_mode:
-            assert self._edge_drag_item is not None
-            pos = event.pos()
-            scene_pos = self.mapToScene(pos)
-            self._edge_drag_item.movable_pos = scene_pos
-            self.scene().update()
+            if self._edge_drag_item is None:
+                item = self._clicked_port_item
+                assert item is not None
+                self._edge_drag_item = EdgeDragItem(
+                    item.port, None,
+                    self.scene().editor.setting.edge_drag_item_setting)
+                self.scene().addItem(self._edge_drag_item)
+            else:
+                pos = event.pos()
+                scene_pos = self.mapToScene(pos)
+                self._edge_drag_item.movable_pos = scene_pos
+                self.scene().update()
+        else:
+            if self._clicked_port_item is not None:
+                self.edge_drag_mode = True
         return super().mouseMoveEvent(event)
 
     def left_mouse_button_press(self, event: QtGui.QMouseEvent):
         item = self.itemAt(event.pos())
         if isinstance(item, PortItem):
-            self.edge_drag_mode = True
-            self._edge_drag_item = EdgeDragItem(
-                item.port, None,
-                self.scene().editor.setting.edge_drag_item_setting)
-            self.scene().addItem(self._edge_drag_item)
+            self._clicked_port_item = item
         super().mousePressEvent(event)
 
     def left_mouse_button_release(self, event: QtGui.QMouseEvent):
+        if self._clicked_port_item is not None:
+            self._clicked_port_item = None
         if self.edge_drag_mode:
             self.edge_drag_mode = False
             assert self._edge_drag_item is not None
