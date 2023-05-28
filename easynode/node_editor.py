@@ -32,15 +32,12 @@ class NodeEditor(QtWidgets.QWidget):
         self.resize(800, 600)
         self.setWindowTitle("EasyNode")
 
-        self.scene = GraphicsScene(
-            self, self.setting.graphics_scene_setting)
+        self.scene = GraphicsScene(self)
+        self.scene.editor = self
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.view = GraphicsView(
-            self.scene, self, self.setting.graphics_view_setting,
-            self.setting.edge_item_setting,
-            self.setting.edge_drag_item_setting)
+        self.view = GraphicsView(self.scene, self)
         self.layout.addWidget(self.view)
 
     def load_style_sheet(self, path: str):

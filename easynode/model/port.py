@@ -2,6 +2,7 @@ import typing as T
 
 if T.TYPE_CHECKING:
     from .node import Node
+    from .edge import Edge
     from ..widgets.port_item import PortItem
 
 
@@ -11,6 +12,7 @@ class Port():
         self.node: T.Optional["Node"] = None
         self.item: T.Optional["PortItem"] = None
         self.type: T.Optional[str] = None
+        self.edges: T.List["Edge"] = []
 
 
 class DataPort(Port):

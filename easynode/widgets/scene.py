@@ -3,18 +3,16 @@ import typing as T
 
 from qtpy import QtWidgets, QtCore, QtGui
 
-from ..setting import GraphicsSceneSetting  # type: ignore
+from ..model.graph import Graph  # type: ignore
+
+if T.TYPE_CHECKING:
+    from ..node_editor import NodeEditor  # type: ignore
 
 
 class GraphicsScene(QtWidgets.QGraphicsScene):
-    def __init__(
-            self,
-            parent: T.Optional[QtWidgets.QWidget] = None,
-            setting: T.Optional[GraphicsSceneSetting] = None):
-        super().__init__(parent)
-        if setting is None:
-            setting = GraphicsSceneSetting()
-        self.setting = setting
+    def __init__(self, editor: "NodeEditor"):
+        super().__init__(editor)
+        setting = self.setting = editor.setting.graphics_scene_setting
         w, h = setting.width, setting.height
         self.setSceneRect(0, 0, w, h)
         self.setBackgroundBrush(QtGui.QColor(setting.background_color))
@@ -22,6 +20,8 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
             QtGui.QColor(self.setting.grid_color_dense))
         self.pen_grid_loose = QtGui.QPen(
             QtGui.QColor(self.setting.grid_color_loose))
+        self.editor: T.Optional["NodeEditor"] = None
+        self.graph = Graph(self)
 
     def drawBackground(
             self, painter: QtGui.QPainter,

@@ -1,36 +1,32 @@
 import typing as T
 
 from qtpy import QtWidgets, QtGui, QtCore
-from ..setting import GraphicsViewSetting  # type: ignore
 from .port_item import PortItem
-from .edge_item import EdgeDragItem, EdgeItemSetting
+from .edge_item import EdgeDragItem
+from .edge_item import EdgeItem
+from .node_item import NodeItem
+
+if T.TYPE_CHECKING:
+    from .scene import GraphicsScene
 
 
 class GraphicsView(QtWidgets.QGraphicsView):
     def __init__(
             self,
-            scene: QtWidgets.QGraphicsScene,
+            scene: "GraphicsScene",
             parent: T.Optional[QtWidgets.QWidget] = None,
-            setting: T.Optional[GraphicsViewSetting] = None,
-            edge_item_setting: T.Optional["EdgeItemSetting"] = None,
-            edge_drag_item_setting: T.Optional["EdgeItemSetting"] = None,
             ) -> None:
         super().__init__(parent)
-        if setting is None:
-            setting = GraphicsViewSetting()
-        self.setting = setting
-        if edge_item_setting is None:
-            edge_item_setting = EdgeItemSetting()
-        self.edge_item_setting = edge_item_setting
-        if edge_drag_item_setting is None:
-            edge_drag_item_setting = EdgeItemSetting()
-        self.edge_drag_item_setting = edge_drag_item_setting
+        self.setting = scene.editor.setting.graphics_view_setting
         self.setScene(scene)
         self.setup_layout()
         self.current_zoom = 5
         self.zoom_mode = False
         self.edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
+
+    def scene(self) -> "GraphicsScene":
+        return super().scene()
 
     @property
     def edge_drag_mode(self) -> bool:
@@ -96,7 +92,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         if isinstance(item, PortItem):
             self.edge_drag_mode = True
             self._edge_drag_item = EdgeDragItem(
-                item.port, None, self.edge_drag_item_setting)
+                item.port, None,
+                self.scene().editor.setting.edge_drag_item_setting)
             self.scene().addItem(self._edge_drag_item)
         super().mousePressEvent(event)
 
@@ -107,11 +104,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
             stop_item = self.itemAt(event.pos())
             if isinstance(stop_item, PortItem):
                 try:
-                    new_edge = self._edge_drag_item.create_edge(
-                        stop_item.port)
-                    new_edge.create_item(
-                        self.scene(), self.edge_item_setting
-                    )
+                    new_edge = self._edge_drag_item.create_edge(stop_item.port)
+                    self.scene().graph.add_edge(new_edge)
                 except Exception as e:
                     print(e)
             self.scene().removeItem(self._edge_drag_item)
@@ -148,12 +142,24 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Control:  # type: ignore
             self.zoom_mode = True
+        if event.key() == QtCore.Qt.Key_Delete:  # type: ignore
+            self.remove_selected_items()
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Control:  # type: ignore
             self.zoom_mode = False
         super().keyReleaseEvent(event)
+
+    def remove_selected_items(self):
+        graph = self.scene().graph
+        for item in self.scene().selectedItems():
+            if isinstance(item, NodeItem):
+                node = item.node
+                graph.remove_node(node)
+            elif isinstance(item, EdgeItem):
+                edge = item.edge
+                graph.remove_edge(edge)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         if not self.zoom_mode:

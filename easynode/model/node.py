@@ -34,7 +34,8 @@ class Node(object):
             port.type = "out"
             port.node = self
         self.widget = widget
-        self.item = None
+        self.item: T.Optional["NodeItem"] = None
+        self.graph: T.Optional["GraphicsScene"] = None
 
     @property
     def title(self) -> str:

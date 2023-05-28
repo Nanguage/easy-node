@@ -7,6 +7,7 @@ from ..setting import EdgeItemSetting
 
 if T.TYPE_CHECKING:
     from ..widgets.scene import GraphicsScene
+    from .graph import Graph
 
 
 class Edge:
@@ -16,6 +17,7 @@ class Edge:
         self.source_port = source_port
         self.target_port = target_port
         self.item: T.Optional[EdgeItem] = None
+        self.graph: T.Optional["Graph"] = None
 
     def create_item(
             self, scene: "GraphicsScene",
