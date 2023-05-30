@@ -16,7 +16,8 @@ class Node(object):
             name: str,
             input_ports: T.Optional[T.List[Port]] = None,
             output_ports: T.Optional[T.List[Port]] = None,
-            widget: T.Optional["QWidget"] = None
+            widget: T.Optional["QWidget"] = None,
+            **attrs
             ) -> None:
         self.type_name = type_name
         self.name = name
@@ -36,6 +37,7 @@ class Node(object):
         self.widget = widget
         self.item: T.Optional["NodeItem"] = None
         self.graph: T.Optional["GraphicsScene"] = None
+        self.attrs = attrs
 
     @property
     def title(self) -> str:
@@ -45,5 +47,9 @@ class Node(object):
             self, scene: "GraphicsScene",
             setting: T.Optional[NodeItemSetting] = None):
         item = NodeItem(None, self, setting)
+        if 'pos' in self.attrs:
+            pos = self.attrs['pos']
+            assert isinstance(pos, tuple)
+            item.setPos(*pos)
         scene.addItem(item)
         self.item = item

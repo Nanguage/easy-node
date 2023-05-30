@@ -23,6 +23,21 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
         self.editor: T.Optional["NodeEditor"] = None
         self.graph = Graph(self)
 
+    @property
+    def graph(self) -> Graph:
+        return self._graph
+
+    @graph.setter
+    def graph(self, graph: Graph) -> None:
+        self._graph = graph
+        graph.scene = self
+        if self.editor:
+            editor_setting = self.editor.setting
+            for node in graph.nodes:
+                node.create_item(self, editor_setting.node_item_setting)
+            for edge in graph.edges:
+                edge.create_item(self, editor_setting.edge_item_setting)
+
     def drawBackground(
             self, painter: QtGui.QPainter,
             rect: T.Union[QtCore.QRectF, QtCore.QRect]) -> None:

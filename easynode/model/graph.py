@@ -7,19 +7,24 @@ if T.TYPE_CHECKING:
 
 
 class Graph:
-    def __init__(self, scene: "GraphicsScene") -> None:
+    def __init__(
+            self,
+            scene: T.Optional["GraphicsScene"] = None,
+            ) -> None:
         self.nodes: T.List[Node] = []
         self.edges: T.List[Edge] = []
-        self.scene = scene
+        self.scene: T.Optional["GraphicsScene"] = scene
 
     def add_node(self, node: Node):
         self.nodes.append(node)
-        setting = self.scene.editor.setting.node_item_setting
-        node.create_item(self.scene, setting)
+        if self.scene:
+            setting = self.scene.editor.setting.node_item_setting
+            node.create_item(self.scene, setting)
 
     def remove_node(self, node: Node):
         self.nodes.remove(node)
-        self.scene.removeItem(node.item)
+        if self.scene:
+            self.scene.removeItem(node.item)
         for port in node.input_ports:
             for edge in port.edges:
                 self.remove_edge(edge)
@@ -29,8 +34,9 @@ class Graph:
 
     def add_edge(self, edge: Edge):
         self.edges.append(edge)
-        setting = self.scene.editor.setting.edge_item_setting
-        edge.create_item(self.scene, setting)
+        if self.scene:
+            setting = self.scene.editor.setting.edge_item_setting
+            edge.create_item(self.scene, setting)
         edge.source_port.edges.append(edge)
         edge.target_port.edges.append(edge)
 
@@ -38,4 +44,5 @@ class Graph:
         self.edges.remove(edge)
         edge.source_port.edges.remove(edge)
         edge.target_port.edges.remove(edge)
-        self.scene.removeItem(edge.item)
+        if self.scene:
+            self.scene.removeItem(edge.item)
