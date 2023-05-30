@@ -7,6 +7,7 @@ from ..setting import NodeItemSetting
 if T.TYPE_CHECKING:
     from ..widgets.scene import GraphicsScene
     from qtpy.QtWidgets import QWidget
+    from .edge import Edge
 
 
 class Node(object):
@@ -40,6 +41,10 @@ class Node(object):
         self.attrs = attrs
 
     @property
+    def id(self) -> int:
+        return id(self)
+
+    @property
     def title(self) -> str:
         return self.type_name + ": " + self.name
 
@@ -53,3 +58,17 @@ class Node(object):
             item.setPos(*pos)
         scene.addItem(item)
         self.item = item
+
+    @property
+    def input_edges(self) -> T.List["Edge"]:
+        edges = []
+        for port in self.input_ports:
+            edges.extend(port.edges)
+        return edges
+
+    @property
+    def output_edges(self) -> T.List["Edge"]:
+        edges = []
+        for port in self.output_ports:
+            edges.extend(port.edges)
+        return edges

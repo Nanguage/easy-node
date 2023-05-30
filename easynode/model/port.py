@@ -14,6 +14,15 @@ class Port():
         self.type: T.Optional[str] = None
         self.edges: T.List["Edge"] = []
 
+    @property
+    def index(self) -> int:
+        if self.node is None:
+            raise ValueError("Node is not set")
+        if self.type == "in":
+            return self.node.input_ports.index(self)
+        else:
+            return self.node.output_ports.index(self)
+
 
 class DataPort(Port):
     def __init__(
