@@ -31,6 +31,13 @@ class NodeItem(QtWidgets.QGraphicsItem):
         else:
             super().mousePressEvent(event)
 
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemSelectedChange:
+            self.node.selected_changed.emit(value)
+        elif change == QtWidgets.QGraphicsItem.ItemPositionChange:
+            self.node.position_changed.emit(value)
+        return super().itemChange(change, value)
+
     def get_item_at(
             self, pos: QtCore.QPointF
             ) -> T.Optional[QtWidgets.QGraphicsItem]:
@@ -58,6 +65,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def init_layout(self):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges)
         self.init_title()
         self.init_content()
 

@@ -1,20 +1,24 @@
 import typing as T
 
-from .port import Port
+from qtpy import QtCore
 
 from ..widgets.edge_item import EdgeItem
 from ..setting import EdgeItemSetting
 
 if T.TYPE_CHECKING:
+    from .port import Port
     from ..widgets.scene import GraphicsScene
     from .graph import Graph
 
 
-class Edge:
+class Edge(QtCore.QObject):
+    selected_changed = QtCore.Signal(bool)
+
     def __init__(
-            self, source_port: Port, target_port: Port,
+            self, source_port: "Port", target_port: "Port",
             item_setting: T.Optional[EdgeItemSetting] = None,
             ) -> None:
+        super().__init__()
         self.source_port = source_port
         self.target_port = target_port
         self.item: T.Optional[EdgeItem] = None

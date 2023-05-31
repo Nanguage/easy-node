@@ -99,6 +99,11 @@ class EdgeItem(EdgeItemBase):
         self.setFlag(
             QtWidgets.QGraphicsItem.ItemIsSelectable)  # type: ignore
 
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemSelectedChange:
+            self.edge.selected_changed.emit(value)
+        return super().itemChange(change, value)
+
     @property
     def source_pos(self) -> QtCore.QPointF:
         item = self.edge.source_port.item

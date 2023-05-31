@@ -1,5 +1,7 @@
 import typing as T
 
+from qtpy import QtCore
+
 from .port import Port
 from ..widgets.node_item import NodeItem
 from ..setting import NodeItemSetting
@@ -10,21 +12,39 @@ if T.TYPE_CHECKING:
     from .edge import Edge
 
 
-class Node(object):
+class Node(QtCore.QObject):
+    selected_changed = QtCore.Signal(bool)
+    position_changed = QtCore.Signal(QtCore.QPointF)
+
     def __init__(
             self,
-            type_name: str,
             name: str,
+            type_name: T.Optional[str] = None,
             input_ports: T.Optional[T.List[Port]] = None,
             output_ports: T.Optional[T.List[Port]] = None,
             widget: T.Optional["QWidget"] = None,
             item_setting: T.Optional[NodeItemSetting] = None,
             **attrs
             ) -> None:
+        super().__init__()
         self.status = "normal"
+        if type_name is None:
+            type_name = self.__class__.__name__
         self.type_name = type_name
         self.name = name
+        self.init_ports(input_ports, output_ports)
         self.widget: T.Optional["QWidget"] = None
+        self.widget = widget
+        self.item: T.Optional["NodeItem"] = None
+        self.graph: T.Optional["GraphicsScene"] = None
+        self.item_setting = item_setting
+        self.attrs = attrs
+
+    def init_ports(
+            self,
+            input_ports: T.Optional[T.List[Port]] = None,
+            output_ports: T.Optional[T.List[Port]] = None
+            ):
         if input_ports is None:
             input_ports = []
         if output_ports is None:
@@ -37,11 +57,6 @@ class Node(object):
         for port in output_ports:
             port.type = "out"
             port.node = self
-        self.widget = widget
-        self.item: T.Optional["NodeItem"] = None
-        self.graph: T.Optional["GraphicsScene"] = None
-        self.item_setting = item_setting
-        self.attrs = attrs
 
     @property
     def id(self) -> int:

@@ -37,18 +37,18 @@ class Graph:
 
     def add_edge(self, edge: Edge):
         self.edges.append(edge)
+        edge.source_port.edge_added.emit(edge)
+        edge.target_port.edge_added.emit(edge)
         if self.scene:
             edge.create_item(self.scene)
             setting = self.scene.editor.setting.edge_item_setting
             if edge.item_setting is None:
                 edge.item_setting = setting
-        edge.source_port.edges.append(edge)
-        edge.target_port.edges.append(edge)
 
     def remove_edge(self, edge: Edge):
         self.edges.remove(edge)
-        edge.source_port.edges.remove(edge)
-        edge.target_port.edges.remove(edge)
+        edge.source_port.edge_removed.emit(edge)
+        edge.target_port.edge_removed.emit(edge)
         if self.scene:
             self.scene.removeItem(edge.item)
 

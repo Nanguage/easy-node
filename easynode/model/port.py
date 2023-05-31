@@ -1,21 +1,35 @@
 import typing as T
 
+from qtpy import QtCore
+
 from ..widgets.port_item import PortItem
+from .edge import Edge
 
 if T.TYPE_CHECKING:
     from .node import Node
-    from .edge import Edge
     from ..widgets.scene import GraphicsScene
     from ..setting import PortItemSetting
 
 
-class Port():
+class Port(QtCore.QObject):
+    edge_added = QtCore.Signal(Edge)
+    edge_removed = QtCore.Signal(Edge)
+
     def __init__(self, name: str) -> None:
+        super().__init__()
         self.name = name
         self.node: T.Optional["Node"] = None
         self.item: T.Optional["PortItem"] = None
         self.type: T.Optional[str] = None
         self.edges: T.List["Edge"] = []
+        self.edge_added.connect(self.on_edge_added)
+        self.edge_removed.connect(self.on_edge_removed)
+
+    def on_edge_added(self, edge: Edge):
+        self.edges.append(edge)
+
+    def on_edge_removed(self, edge: Edge):
+        self.edges.remove(edge)
 
     @property
     def index(self) -> int:
