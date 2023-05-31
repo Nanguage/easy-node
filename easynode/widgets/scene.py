@@ -32,11 +32,7 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
         self._graph = graph
         graph.scene = self
         if self.editor:
-            editor_setting = self.editor.setting
-            for node in graph.nodes:
-                node.create_item(self, editor_setting.node_item_setting)
-            for edge in graph.edges:
-                edge.create_item(self, editor_setting.edge_item_setting)
+            graph.create_items()
 
     def drawBackground(
             self, painter: QtGui.QPainter,

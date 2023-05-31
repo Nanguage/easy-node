@@ -18,6 +18,7 @@ class Node(object):
             input_ports: T.Optional[T.List[Port]] = None,
             output_ports: T.Optional[T.List[Port]] = None,
             widget: T.Optional["QWidget"] = None,
+            item_setting: T.Optional[NodeItemSetting] = None,
             **attrs
             ) -> None:
         self.type_name = type_name
@@ -38,6 +39,7 @@ class Node(object):
         self.widget = widget
         self.item: T.Optional["NodeItem"] = None
         self.graph: T.Optional["GraphicsScene"] = None
+        self.item_setting = item_setting
         self.attrs = attrs
 
     @property
@@ -52,10 +54,8 @@ class Node(object):
         cls_name = self.__class__.__name__
         return f"{cls_name}({self.title})"
 
-    def create_item(
-            self, scene: "GraphicsScene",
-            setting: T.Optional[NodeItemSetting] = None):
-        item = NodeItem(None, self, setting)
+    def create_item(self, scene: "GraphicsScene"):
+        item = NodeItem(None, self, self.item_setting)
         if 'pos' in self.attrs:
             pos = self.attrs['pos']
             assert isinstance(pos, tuple)

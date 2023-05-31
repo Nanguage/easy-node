@@ -27,7 +27,7 @@ class GraphicsViewSetting:
 
 @dataclass
 class PortItemSetting:
-    radius: float = 8.0
+    radius: float = 6.0
     outline_width: float = 1.0
     color_background: str = "#FFFF8800"
     color_background_hover: str = "#FFFFF637"
@@ -38,19 +38,19 @@ class PortItemSetting:
 class PortSetting:
     item_setting: PortItemSetting = PortItemSetting()
     height: float = 30.0
-    label_font_size: float = 12.0
+    label_font_size: float = 10.0
 
 
 @dataclass
 class NodeItemSetting:
-    title_color: str = "#ffffff"
+    title_color: str = "#FFFFFF"
     title_font_size: float = 10
     title_padding: float = 5.0
     title_area_height: float = 24.0
-    title_area_color: str = "#FF33363"
+    title_area_color: str = "#F0000000"
     background_color: str = "#E0222222"
     default_width: float = 200.0
-    outline_radius: float = 10.0
+    outline_radius: float = 0.0
     outline_width: float = 2.0
     outline_color: str = "#7F000000"  # alpha, R, G, B
     outline_color_selected: str = "#FFFFA637"
