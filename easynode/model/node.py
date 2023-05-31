@@ -21,6 +21,7 @@ class Node(object):
             item_setting: T.Optional[NodeItemSetting] = None,
             **attrs
             ) -> None:
+        self.status = "normal"
         self.type_name = type_name
         self.name = name
         self.widget: T.Optional["QWidget"] = None

@@ -1,5 +1,5 @@
 import typing as T
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -48,6 +48,14 @@ class NodeItemSetting:
     title_padding: float = 5.0
     title_area_height: float = 24.0
     title_area_color: str = "#F0000000"
+    status_bar_height: float = 5.0
+    status_to_color: T.Dict[str, str] = field(
+        default_factory=lambda: {
+            "normal": "#00000000",
+            "running": "#000000FF",
+            "success": "#0000FF00",
+            "error": "#00FF0000",
+        })
     background_color: str = "#E0222222"
     default_width: float = 200.0
     outline_radius: float = 0.0

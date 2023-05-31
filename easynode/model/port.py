@@ -34,7 +34,7 @@ class Port():
         assert node_item is not None
         ni_setting = node_item.setting
         item = PortItem(node_item, self, setting)
-        y = ni_setting.title_area_height
+        y = node_item.header_height
         y += ni_setting.space_between_title_and_content
         y += ni_setting.port_setting.item_setting.radius
         y += ni_setting.port_setting.item_setting.outline_width

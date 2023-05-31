@@ -50,6 +50,10 @@ class NodeItem(QtWidgets.QGraphicsItem):
             setting.outline_width)
         self.brush_title_area = QBrush(QColor(setting.title_area_color))
         self.brush_background = QBrush(QColor(setting.background_color))
+        self.brush_status = {
+            status: QBrush(QColor(color))
+            for status, color in setting.status_to_color.items()
+        }
 
     def init_layout(self):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
@@ -163,54 +167,75 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def size(self) -> T.Tuple[float, float]:
         return self.width, self.height
 
+    @property
+    def header_height(self) -> float:
+        return (
+            self.setting.title_area_height +
+            self.setting.status_bar_height
+        )
+
     def paint(self,
               painter: QtGui.QPainter,
               option: QtWidgets.QStyleOptionGraphicsItem,
               widget: T.Optional[QtWidgets.QWidget] = None) -> None:
-        width, height = self.size
         if not self.painted:  # first paint
             self.painted = True
             self.init_port_items()
-        title_height = self.setting.title_area_height
-        outline_radius = self.setting.outline_radius
-        self.paint_title(width, title_height, outline_radius, painter)
-        self.paint_body(width, height, title_height, outline_radius, painter)
-        self.paint_outline(width, height, outline_radius, painter)
+        self.paint_title(painter)
+        self.paint_status_bar(painter)
+        self.paint_body(painter)
+        self.paint_outline(painter)
 
-    def paint_title(
-            self, width: float, title_height: float,
-            outline_radius: float, painter: QtGui.QPainter):
+    def paint_title(self, painter: QtGui.QPainter):
+        width = self.width
+        height = self.setting.title_area_height
+        outline_radius = self.setting.outline_radius
         path_title = QtGui.QPainterPath()
         path_title.setFillRule(QtCore.Qt.WindingFill)  # type: ignore
         path_title.addRoundedRect(
-            0, 0, width, title_height, outline_radius, outline_radius)
+            0, 0, width, height, outline_radius, outline_radius)
         path_title.addRect(
-            0, title_height - outline_radius, outline_radius, outline_radius)
+            0, height - outline_radius, outline_radius, outline_radius)
         path_title.addRect(
-            width - outline_radius, title_height - outline_radius,
+            width - outline_radius, height - outline_radius,
             outline_radius, outline_radius)
         painter.setPen(QtCore.Qt.NoPen)  # type: ignore
         painter.setBrush(self.brush_title_area)
         painter.drawPath(path_title.simplified())
 
-    def paint_body(
-            self, width: float, height: float, title_height: float,
-            outline_radius: float, painter: QtGui.QPainter):
+    def paint_status_bar(self, painter: QtGui.QPainter):
+        height = self.setting.status_bar_height
+        width = self.width
+        title_height = self.setting.title_area_height
+        path_status_bar = QtGui.QPainterPath()
+        path_status_bar.setFillRule(QtCore.Qt.WindingFill)  # type: ignore
+        path_status_bar.addRect(0, title_height, width, height)
+        painter.setPen(QtCore.Qt.NoPen)  # type: ignore
+        status = self.node.status
+        painter.setBrush(self.brush_status[status])
+        painter.drawPath(path_status_bar.simplified())
+
+    def paint_body(self, painter: QtGui.QPainter):
+        header_height = self.header_height
+        width = self.width
+        body_height = self.height - header_height
+        outline_radius = self.setting.outline_radius
         path_body = QtGui.QPainterPath()
         path_body.setFillRule(QtCore.Qt.WindingFill)  # type: ignore
         path_body.addRoundedRect(
-            0, title_height, width, height - title_height,
+            0, header_height, width, body_height,
             outline_radius, outline_radius)
-        path_body.addRect(0, title_height, outline_radius, outline_radius)
+        path_body.addRect(0, header_height, outline_radius, outline_radius)
         path_body.addRect(
-            width-outline_radius, title_height, outline_radius, outline_radius)
+            width-outline_radius, header_height,
+            outline_radius, outline_radius)
         painter.setPen(QtCore.Qt.NoPen)  # type: ignore
         painter.setBrush(self.brush_background)
         painter.drawPath(path_body.simplified())
 
-    def paint_outline(
-            self, width: float, height: float,
-            outline_radius: float, painter: QtGui.QPainter):
+    def paint_outline(self, painter: QtGui.QPainter):
+        width, height = self.size
+        outline_radius = self.setting.outline_radius
         path_outline = QtGui.QPainterPath()
         path_outline.addRoundedRect(
             0, 0, width, height, outline_radius, outline_radius)
