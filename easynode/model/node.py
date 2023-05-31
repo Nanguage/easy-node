@@ -48,6 +48,10 @@ class Node(object):
     def title(self) -> str:
         return self.type_name + ": " + self.name
 
+    def __repr__(self) -> str:
+        cls_name = self.__class__.__name__
+        return f"{cls_name}({self.title})"
+
     def create_item(
             self, scene: "GraphicsScene",
             setting: T.Optional[NodeItemSetting] = None):

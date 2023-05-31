@@ -170,7 +170,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         width, height = self.size
         if not self.painted:  # first paint
             self.painted = True
-            self.init_port_items(width)
+            self.init_port_items()
         title_height = self.setting.title_area_height
         outline_radius = self.setting.outline_radius
         self.paint_title(width, title_height, outline_radius, painter)
@@ -220,31 +220,11 @@ class NodeItem(QtWidgets.QGraphicsItem):
         painter.setBrush(QtCore.Qt.NoBrush)  # type: ignore
         painter.drawPath(path_outline)
 
-    def init_port_items(self, width: float):
+    def init_port_items(self):
         in_ports = self.node.input_ports
         out_ports = self.node.output_ports
-        max_port_idx = max(len(in_ports), len(out_ports))
-        for idx in range(max_port_idx):
-            for ports in [in_ports, out_ports]:
-                if idx < len(ports):
-                    port = ports[idx]
-                    port.item = self._init_port_item(
-                        port, idx, width)
-                else:
-                    continue
-
-    def _init_port_item(
-            self, port: "Port", idx: int, width: float
-            ) -> "PortItem":
-        port_item = PortItem(
-            self, port, self.setting.port_setting.item_setting)
-        y = self.setting.title_area_height
-        y += self.setting.space_between_title_and_content
-        y += self.setting.port_setting.item_setting.radius
-        y += self.setting.port_setting.item_setting.outline_width
-        y += self.setting.port_setting.height * idx
-        if port.type == 'in':
-            port_item.setPos(0, y)
-        else:
-            port_item.setPos(width, y)
-        return port_item
+        for ports in [in_ports, out_ports]:
+            for port in ports:
+                port.create_item(
+                    self.scene(),
+                    self.setting.port_setting.item_setting)
