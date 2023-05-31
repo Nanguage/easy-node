@@ -1,6 +1,7 @@
 import typing as T
 from .node import Node
 from .edge import Edge
+from ..utils import layout_graph
 
 if T.TYPE_CHECKING:
     from ..widgets.scene import GraphicsScene
@@ -46,3 +47,18 @@ class Graph:
         edge.target_port.edges.remove(edge)
         if self.scene:
             self.scene.removeItem(edge.item)
+
+    def auto_layout(
+            self,
+            direction: str = "LR",
+            padding_level: int = 100,
+            padding_node: int = 20,
+            ) -> None:
+        if self.scene:
+            layout_graph(
+                self, direction=direction,
+                padding_level=padding_level,
+                padding_node=padding_node
+            )
+        else:
+            raise ValueError("Scene is not set")
