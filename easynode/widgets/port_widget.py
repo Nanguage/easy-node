@@ -1,11 +1,13 @@
 import typing as T
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 if T.TYPE_CHECKING:
     from ..model.port import DataPort
 
 
 class TextPortWidget(QtWidgets.QLineEdit):
+    value_changed = QtCore.Signal(str)
+
     def __init__(
             self,
             port: "DataPort",
@@ -20,9 +22,15 @@ class TextPortWidget(QtWidgets.QLineEdit):
         if port.data_default is not None:
             assert isinstance(port.data_default, str)
             self.setText(port.data_default)
+        self.editingFinished.connect(self.on_editing_finished)  # type: ignore
+
+    def on_editing_finished(self):
+        self.value_changed.emit(self.text())
 
 
 class IntPortWidget(QtWidgets.QSpinBox):
+    value_changed = QtCore.Signal(int)
+
     def __init__(
             self,
             port: "DataPort",
@@ -43,9 +51,12 @@ class IntPortWidget(QtWidgets.QSpinBox):
         else:
             max_int = 2 ** 31 - 1
             self.setRange(-max_int, max_int)
+        self.valueChanged.connect(self.value_changed.emit)  # type: ignore
 
 
 class FloatPortWidget(QtWidgets.QDoubleSpinBox):
+    value_changed = QtCore.Signal(float)
+
     def __init__(
             self,
             port: "DataPort",
@@ -65,3 +76,4 @@ class FloatPortWidget(QtWidgets.QDoubleSpinBox):
             self.setRange(port.data_range[0], port.data_range[1])
         else:
             self.setRange(-float('inf'), float('inf'))
+        self.valueChanged.connect(self.value_changed.emit)  # type: ignore

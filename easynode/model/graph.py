@@ -38,6 +38,8 @@ class Graph:
                 self.remove_edge(edge)
 
     def add_edge(self, edge: Edge):
+        if edge in self.edges:
+            return
         self.edges.append(edge)
         edge.source_port.edge_added.emit(edge)
         edge.target_port.edge_added.emit(edge)

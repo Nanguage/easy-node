@@ -30,3 +30,9 @@ class Edge(QtCore.QObject):
         scene.addItem(item)
         item.update_path()
         self.item = item
+
+    def __eq__(self, other):
+        return (
+            self.source_port == other.source_port and
+            self.target_port == other.target_port
+        )
