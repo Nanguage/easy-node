@@ -3,6 +3,7 @@ import typing as T
 from qtpy import QtWidgets, QtGui, QtCore
 
 from ..setting import NodeItemSetting  # type: ignore
+from ..model.port import DataPort  # type: ignore
 from .port_item import PortItem
 
 if T.TYPE_CHECKING:
@@ -66,8 +67,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges)
-        self.init_title()
         self.init_content()
+        self.init_title()
 
     def init_title(self):
         title_color = QtGui.QColor(self.setting.title_color)
@@ -83,7 +84,6 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
     def init_content(self):
         self.content_widget = widget = QtWidgets.QWidget()
-        widget.setFixedWidth(self.width)
         widget.setStyleSheet("background: transparent;")
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -109,22 +109,28 @@ class NodeItem(QtWidgets.QGraphicsItem):
         ports_layout.setSpacing(0)
         ports_widget.setLayout(ports_layout)
         max_port_idx = max(len(in_ports), len(out_ports))
-        if self.width is None:
-            ports_widget.setFixedWidth(int(self.width))
         for idx in range(max_port_idx):
-            port_widget = QtWidgets.QWidget(parent=ports_widget)
-            port_layout = QtWidgets.QHBoxLayout()
-            port_layout.setContentsMargins(0, 0, 0, 0)
-            port_widget.setLayout(port_layout)
-            port_widget.setFixedHeight(self.setting.port_setting.height)
+            row = QtWidgets.QWidget(parent=ports_widget)
+            row_layout = QtWidgets.QHBoxLayout()
+            row_layout.setContentsMargins(0, 0, 0, 0)
+            row.setLayout(row_layout)
+            row.setFixedHeight(self.setting.port_setting.height)
             for tp, ports in zip(['in', 'out'], [in_ports, out_ports]):
                 if idx < len(ports):
                     port = ports[idx]
                     port_label = self._get_port_label(port, tp)
-                    port_layout.addWidget(port_label)
+                    row_layout.addWidget(port_label)
+                    row_layout.setSpacing(1)
+                    if tp == 'in':
+                        if isinstance(port, DataPort):
+                            port_widget = port.get_port_widget()
+                            row_layout.addWidget(port_widget)
+                        row_layout.addSpacing(
+                            self.setting.port_setting.space_between_in_and_out)
+                        row_layout.addStretch()
                 else:
-                    port_layout.addStretch()
-            ports_layout.addWidget(port_widget)
+                    row_layout.addStretch()
+            ports_layout.addWidget(row)
         layout.addWidget(ports_widget)
 
     def _get_port_label(
@@ -132,16 +138,17 @@ class NodeItem(QtWidgets.QGraphicsItem):
             ) -> QtWidgets.QLabel:
         align_left = QtCore.Qt.AlignLeft  # type: ignore
         align_right = QtCore.Qt.AlignRight  # type: ignore
+        align_v_center = QtCore.Qt.AlignVCenter  # type: ignore
         padding = self.setting.port_setting.item_setting.radius
         port_label = QtWidgets.QLabel(port.name)
         if tp == 'in':
-            port_label.setAlignment(align_left)
+            port_label.setAlignment(align_left | align_v_center)
             port_label.setStyleSheet(
                 f"padding-left: {padding}px; color: white;")
         else:
-            port_label.setAlignment(align_right)
+            port_label.setAlignment(align_right | align_v_center)
             port_label.setStyleSheet(
-                f"padding-right: {padding}px; color: white;")
+                f"padding-right: {padding + 3}px; color: white;")
         font = QtGui.QFont(
             'Arial', self.setting.port_setting.label_font_size)
         port_label.setFont(font)
@@ -155,10 +162,14 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
     @property
     def width(self) -> float:
+        min_width = max(
+            self.setting.default_width,
+            self.content_widget.width()
+        )
         if self.node.widget is not None:
-            w = self.node.widget.width()
+            w = max(self.node.widget.width(), min_width)
         else:
-            w = self.setting.default_width
+            w = max(self.content_widget.width(), min_width)
         w += 2 * self.setting.outline_width
         return w
 
@@ -258,6 +269,4 @@ class NodeItem(QtWidgets.QGraphicsItem):
         out_ports = self.node.output_ports
         for ports in [in_ports, out_ports]:
             for port in ports:
-                port.create_item(
-                    self.scene(),
-                    self.setting.port_setting.item_setting)
+                port.create_item(self.scene())

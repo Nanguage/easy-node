@@ -35,10 +35,18 @@ class PortItemSetting:
 
 
 @dataclass
+class PortWidgetSetting:
+    width: float = 60.0
+    height: float = 25.0
+
+
+@dataclass
 class PortSetting:
     item_setting: PortItemSetting = PortItemSetting()
+    widget_setting: PortWidgetSetting = PortWidgetSetting()
     height: float = 30.0
-    label_font_size: float = 10.0
+    label_font_size: float = 11.0
+    space_between_in_and_out: float = 20.0
 
 
 @dataclass
@@ -62,7 +70,7 @@ class NodeItemSetting:
     outline_color: str = "#7F000000"  # alpha, R, G, B
     outline_color_selected: str = "#FFFFA637"
     port_setting: PortSetting = PortSetting()
-    space_between_title_and_content: float = 10.0
+    space_between_title_and_content: float = 4.0
 
 
 @dataclass

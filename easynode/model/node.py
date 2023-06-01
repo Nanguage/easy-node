@@ -51,12 +51,10 @@ class Node(QtCore.QObject):
             output_ports = []
         self.input_ports = input_ports
         self.output_ports = output_ports
-        for port in input_ports:
-            port.type = "in"
-            port.node = self
-        for port in output_ports:
-            port.type = "out"
-            port.node = self
+        for tp, ports in zip(("in", "out"), (input_ports, output_ports)):
+            for port in ports:
+                port.type = tp
+                port.node = self
 
     @property
     def id(self) -> int:
