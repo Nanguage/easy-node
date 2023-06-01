@@ -38,6 +38,7 @@ def get_long_description():
 def get_install_requires():
     requirements = [
         "qtpy",
+        "pyqtdarktheme",
     ]
     return requirements
 

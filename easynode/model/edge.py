@@ -28,4 +28,5 @@ class Edge(QtCore.QObject):
     def create_item(self, scene: "GraphicsScene"):
         item = EdgeItem(self, None, self.item_setting)
         scene.addItem(item)
+        item.update_path()
         self.item = item

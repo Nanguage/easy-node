@@ -1,15 +1,10 @@
 import typing as T
-import os.path as osp
 
 from qtpy import QtWidgets
 
 from .graphics.scene import GraphicsScene
 from .graphics.view import GraphicsView
 from .setting import EditorSetting
-
-
-HERE = osp.dirname(osp.abspath(__file__))
-DEFAULT_STYLE_SHEET = osp.join(HERE, "qss/default.qss")
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -24,8 +19,6 @@ class NodeEditor(QtWidgets.QWidget):
             setting = EditorSetting()
         self.setting = setting
         self.init_layout()
-        if style_sheet is None:
-            style_sheet = DEFAULT_STYLE_SHEET
         self.load_style_sheet(style_sheet)
 
     def init_layout(self):
@@ -40,7 +33,13 @@ class NodeEditor(QtWidgets.QWidget):
         self.view = GraphicsView(self.scene, self)
         self.layout.addWidget(self.view)
 
-    def load_style_sheet(self, path: str):
-        with open(path, "r") as f:
-            app = QtWidgets.QApplication.instance()
-            app.setStyleSheet(f.read())  # type: ignore
+    def load_style_sheet(self, style_sheet: T.Optional[str] = None):
+        app = QtWidgets.QApplication.instance()
+        if style_sheet is None:
+            try:
+                import qdarktheme
+                app.setStyleSheet(qdarktheme.load_stylesheet())  # type: ignore
+            except ImportError:
+                pass
+        else:
+            app.setStyleSheet(style_sheet)  # type: ignore

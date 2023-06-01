@@ -61,7 +61,7 @@ class Port(QtCore.QObject):
         assert node_item is not None
         ni_setting = node_item.setting
         item = PortItem(
-            node_item, self, self.setting.item_setting)
+            self, node_item, self.setting.item_setting)
         y = node_item.header_height
         y += ni_setting.space_between_title_and_content
         y += self.setting.height * self.index
@@ -101,9 +101,13 @@ class DataPort(Port):
             self.widget.setEnabled(True)
 
     def get_port_widget(self) -> QtWidgets.QWidget:
-        from ..widgets.port_widget import TextPortWidget
+        from ..widgets.port_widget import (
+            TextPortWidget, IntPortWidget
+        )
         if self.data_type is str:
             self.widget = TextPortWidget(self)
+        elif self.data_type is int:
+            self.widget = IntPortWidget(self)
         else:
             self.data_default = None
             self.widget = TextPortWidget(self)

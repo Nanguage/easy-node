@@ -14,8 +14,8 @@ class PortItem(QtWidgets.QGraphicsItem):
 
     def __init__(
             self,
+            port: "Port",
             parent: T.Optional[QtWidgets.QWidget] = None,
-            port: "Port" = None,
             setting: T.Optional["PortItemSetting"] = None
             ) -> None:
         super().__init__(parent)
@@ -38,6 +38,8 @@ class PortItem(QtWidgets.QGraphicsItem):
         self.brush = QBrush(QColor(setting.color_background))
         self.brush_hovered = QBrush(QColor(
             setting.color_background_hover))
+        self.brush_connected = QBrush(QColor(
+            setting.color_background_connected))
 
     def hoverEnterEvent(self, event) -> None:
         self.hovered = True
@@ -53,6 +55,8 @@ class PortItem(QtWidgets.QGraphicsItem):
               widget: T.Optional[QtWidgets.QWidget] = None):
         if self.hovered:
             painter.setBrush(self.brush_hovered)
+        elif self.port.edges:
+            painter.setBrush(self.brush_connected)
         else:
             painter.setBrush(self.brush)
         painter.setPen(self.pen)
