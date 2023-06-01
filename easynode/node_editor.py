@@ -3,8 +3,8 @@ import os.path as osp
 
 from qtpy import QtWidgets
 
-from .widgets.scene import GraphicsScene
-from .widgets.view import GraphicsView
+from .graphics.scene import GraphicsScene
+from .graphics.view import GraphicsView
 from .setting import EditorSetting
 
 

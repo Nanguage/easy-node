@@ -3,11 +3,11 @@ import typing as T
 from qtpy import QtCore
 
 from .port import Port
-from ..widgets.node_item import NodeItem
+from ..graphics.node_item import NodeItem
 from ..setting import NodeItemSetting
 
 if T.TYPE_CHECKING:
-    from ..widgets.scene import GraphicsScene
+    from ..graphics.scene import GraphicsScene
     from qtpy.QtWidgets import QWidget
     from .edge import Edge
 

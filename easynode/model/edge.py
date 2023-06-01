@@ -2,12 +2,12 @@ import typing as T
 
 from qtpy import QtCore
 
-from ..widgets.edge_item import EdgeItem
+from ..graphics.edge_item import EdgeItem
 from ..setting import EdgeItemSetting
 
 if T.TYPE_CHECKING:
     from .port import Port
-    from ..widgets.scene import GraphicsScene
+    from ..graphics.scene import GraphicsScene
     from .graph import Graph
 
 

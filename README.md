@@ -9,6 +9,8 @@ A general purpose visual node editor package for Python.
 + [x] Setting for each node(color, size, etc).
 + [x] Node status bar.
 + [x] Signals and slots.
++ [ ] Multiple scenes.
++ [ ] Copy and paste.
 + [ ] Node registration.
 + [ ] Port widget for editing port value.
 + [ ] Node list and search widget.

@@ -4,7 +4,7 @@ from .edge import Edge
 from ..utils import layout_graph
 
 if T.TYPE_CHECKING:
-    from ..widgets.scene import GraphicsScene
+    from ..graphics.scene import GraphicsScene
 
 
 class Graph:
