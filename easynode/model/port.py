@@ -79,11 +79,15 @@ class DataPort(Port):
             self, name: str,
             data_type: type = object,
             data_range: object = None,
-            data_default: object = None) -> None:
-        super().__init__(name)
+            data_default: object = None,
+            widget_args: T.Optional[T.Dict[str, T.Any]] = None,
+            setting: T.Optional["PortSetting"] = None,
+            ) -> None:
+        super().__init__(name, setting)
         self.data_type = data_type
         self.data_range = data_range
         self.data_default = data_default
+        self.widget_args = widget_args
         self.widget: T.Optional[QtWidgets.QWidget] = None
 
     @property
@@ -102,13 +106,17 @@ class DataPort(Port):
 
     def get_port_widget(self) -> QtWidgets.QWidget:
         from ..widgets.port_widget import (
-            TextPortWidget, IntPortWidget
+            TextPortWidget, IntPortWidget,
+            FloatPortWidget,
         )
+        kwargs = self.widget_args or {}
         if self.data_type is str:
-            self.widget = TextPortWidget(self)
+            self.widget = TextPortWidget(self, **kwargs)
         elif self.data_type is int:
-            self.widget = IntPortWidget(self)
+            self.widget = IntPortWidget(self, **kwargs)
+        elif self.data_type is float:
+            self.widget = FloatPortWidget(self, **kwargs)
         else:
             self.data_default = None
-            self.widget = TextPortWidget(self)
+            self.widget = TextPortWidget(self, **kwargs)
         return self.widget

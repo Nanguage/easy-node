@@ -37,7 +37,7 @@ class PortItemSetting:
 
 @dataclass
 class PortWidgetSetting:
-    width: float = 60.0
+    width: float = 70.0
     height: float = 25.0
 
 
