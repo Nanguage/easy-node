@@ -54,15 +54,22 @@ class NodeEditor(QtWidgets.QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.tabs)
 
+    def _get_new_tab_name(self) -> str:  # type: ignore
+        tab_names = [
+            self.tabs.tabText(i) for i in range(self.tabs.count())]
+        for i in range(1, len(tab_names) + 2):
+            if f"scene {i}" not in tab_names:
+                return f"scene {i}"
+
     def add_scene_and_view(self):
         scene = GraphicsScene(self)
         scene.editor = self
         view = GraphicsView(scene, self)
         self.scenes.append(scene)
         self.views.append(view)
-        new_scene_idx = len(self.scenes)
-        self.tabs.addTab(view, f"scene {new_scene_idx}")
-        new_view_idx = len(self.views)
+        new_tab_name = self._get_new_tab_name()
+        self.tabs.addTab(view, new_tab_name)
+        new_view_idx = len(self.views) - 1
         self.tabs.setCurrentIndex(new_view_idx)
         self.current_view = view
 
