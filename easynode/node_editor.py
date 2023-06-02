@@ -5,6 +5,7 @@ from qtpy import QtWidgets
 from .graphics.scene import GraphicsScene
 from .graphics.view import GraphicsView
 from .setting import EditorSetting
+from .node_factory import NodeFactoryTable
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -20,6 +21,14 @@ class NodeEditor(QtWidgets.QWidget):
         self.setting = setting
         self.init_layout()
         self.load_style_sheet(style_sheet)
+        self.factory_table = NodeFactoryTable()
+
+    def create_node(self, type_name: str):
+        factory = self.factory_table.table.get(type_name)
+        if factory is None:
+            raise ValueError(f"Node type {type_name} not found")
+        node = factory.create_node()
+        self.scene.graph.add_node(node)
 
     def init_layout(self):
         self.resize(800, 600)

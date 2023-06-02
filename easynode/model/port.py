@@ -29,6 +29,9 @@ class Port(QtCore.QObject):
         self.edge_removed.connect(self.on_edge_removed)
         self._setting = setting
 
+    def blueprint_copy(self) -> "Port":
+        return Port(self.name, self.setting)
+
     @property
     def setting(self) -> "PortSetting":
         if self._setting is not None:
@@ -89,6 +92,11 @@ class DataPort(Port):
         self.data_default = data_default
         self.widget_args = widget_args
         self.widget: T.Optional[QtWidgets.QWidget] = None
+
+    def blueprint_copy(self) -> "DataPort":
+        return DataPort(
+            self.name, self.data_type, self.data_range,
+            self.data_default, self.widget_args, self.setting)
 
     @property
     def is_active(self) -> bool:
