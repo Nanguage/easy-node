@@ -28,7 +28,8 @@ class Edge(QtCore.QObject):
     def create_item(self, scene: "GraphicsScene"):
         item = EdgeItem(self, None, self.item_setting)
         scene.addItem(item)
-        item.update_path()
+        if self.source_port.item is not None:
+            item.update_path()
         self.item = item
 
     def __eq__(self, other):

@@ -1,6 +1,6 @@
 # Easy node
 
-A general purpose visual node editor package for Python.
+Easynode is a Python package offering a suite of components for building Node editor-based GUI applications, characterized by its simplicity, configurability, and a decoupled design that separates interface display logic from node computation scheduling logic.
 
 
 ## TODO list
@@ -11,7 +11,7 @@ A general purpose visual node editor package for Python.
 + [x] Signals and slots.
 + [x] Port widget for editing port value.
 + [x] Node factory and registration.
-+ [ ] Multiple scenes.
++ [x] Multiple scenes.
 + [ ] Node list for search and add widget.
 + [ ] Copy and paste.
 + [ ] Undo/Redo.

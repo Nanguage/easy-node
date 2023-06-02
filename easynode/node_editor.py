@@ -7,6 +7,7 @@ from .graphics.view import GraphicsView
 from .setting import EditorSetting
 from .node_factory import NodeFactoryTable
 from .widgets.custom_tab import CustomTabWidget
+from .model.node import Node
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -34,12 +35,13 @@ class NodeEditor(QtWidgets.QWidget):
         else:
             return self.current_view.scene()
 
-    def create_node(self, type_name: str):
+    def create_node(self, type_name: str) -> Node:
         factory = self.factory_table.table.get(type_name)
         if factory is None:
             raise ValueError(f"Node type {type_name} not found")
         node = factory.create_node()
         self.current_scene.graph.add_node(node)
+        return node
 
     def init_layout(self):
         self.resize(800, 600)
@@ -76,6 +78,12 @@ class NodeEditor(QtWidgets.QWidget):
         self.tabs.removeTab(index)
         view = self.views.pop(index-1)
         self.scenes.remove(view.scene())
+        # set current view
+        if len(self.views) == 0:
+            self.current_view = None
+        else:
+            new_idx = self.tabs.currentIndex()
+            self.current_view = self.views[new_idx-1]
 
     def load_style_sheet(self, style_sheet: T.Optional[str] = None):
         app = QtWidgets.QApplication.instance()
