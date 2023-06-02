@@ -68,14 +68,13 @@ class NodeEditor(QtWidgets.QWidget):
         self.scenes.append(scene)
         self.views.append(view)
         new_tab_name = self._get_new_tab_name()
-        self.tabs.addTab(view, new_tab_name)
-        new_view_idx = len(self.views) - 1
-        self.tabs.setCurrentIndex(new_view_idx)
+        new_tab_idx = self.tabs.addTab(view, new_tab_name)
+        self.tabs.setCurrentIndex(new_tab_idx)
         self.current_view = view
 
     def delete_tab(self, index: int):
         self.tabs.removeTab(index)
-        view = self.views.pop(index)
+        view = self.views.pop(index-1)
         self.scenes.remove(view.scene())
 
     def load_style_sheet(self, style_sheet: T.Optional[str] = None):

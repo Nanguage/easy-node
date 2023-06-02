@@ -67,7 +67,6 @@ QPushButton {
 class CustomTabWidget(QtWidgets.QTabWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.min_closeable = 1
         self.setStyleSheet(tab_widget_style)
         self.tab_bar = TabBar(self)
         self.tab_bar.setVisible(True)
@@ -77,15 +76,20 @@ class CustomTabWidget(QtWidgets.QTabWidget):
         self.setCornerWidget(self.add_btn, QtCore.Qt.Corner.TopLeftCorner)
         self.setMovable(True)
         self.setTabsClosable(True)
+        self.transparent_tab = QtWidgets.QWidget()
+        self.transparent_tab.setAttribute(
+            QtCore.Qt.WA_TransparentForMouseEvents)  # type: ignore
+        self.transparent_tab_index = self.addTab(self.transparent_tab, "")
+        self.tabBar().setTabVisible(self.transparent_tab_index, False)
 
     def removeTab(self, index):
         super().removeTab(index)
-        if self.count() <= self.min_closeable:
+        if self.count() == 1:
             self.setTabsClosable(False)
-            self.setMovable(False)
+            self.tabBar().setTabVisible(self.transparent_tab_index, True)
 
     def addTab(self, *args, **kwargs):
-        if self.count() >= 1:
+        if self.count() == 1:
             self.setTabsClosable(True)
-            self.setMovable(True)
+            self.tabBar().setTabVisible(self.transparent_tab_index, False)
         return super().addTab(*args, **kwargs)
