@@ -8,7 +8,7 @@ from .setting import NodeItemSetting
 
 class NodeFactory(object):
     _count = 0
-    theme_color = "#000000"
+    theme_color = "#ffffff"
     input_ports: T.List[Port] = []
     output_ports: T.List[Port] = []
 
@@ -39,7 +39,7 @@ class NodeFactory(object):
             output_ports=output_ports,
             widget=cls.get_widget(),
             item_setting=NodeItemSetting(
-                title_area_color=cls.theme_color
+                title_color=cls.theme_color,
             )
         )
 
@@ -50,3 +50,7 @@ class NodeFactoryTable(object):
 
     def register(self, factory: T.Type[NodeFactory]) -> None:
         self.table[factory.type_name()] = factory
+
+    def create_node_list_widget(self) -> QtWidgets.QWidget:
+        from .widgets.node_list import NodeList
+        return NodeList(node_factory_table=self)
