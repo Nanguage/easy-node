@@ -77,10 +77,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.title.setDefaultTextColor(title_color)
         self.title.setFont(title_font)
         self.title.setPlainText(self.node.title)
-        width = self.width
         padding = self.setting.title_padding
         self.title.setPos(padding, 0)
-        self.title.setTextWidth(width - 2 * padding)
 
     def init_content(self):
         self.content_widget = widget = QtWidgets.QWidget()
@@ -164,6 +162,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def width(self) -> float:
         min_width = max(
             self.setting.default_width,
+            self.title.boundingRect().width(),
             self.content_widget.width()
         )
         if self.node.widget is not None:
