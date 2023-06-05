@@ -1,4 +1,5 @@
 import typing as T
+import json
 
 from qtpy import QtWidgets, QtGui, QtCore
 from .port_item import PortItem
@@ -187,3 +188,24 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self.current_zoom, clamped = zoom_range[1], True
         if not clamped:
             self.scale(zoom_factor, zoom_factor)
+
+    def dragEnterEvent(self, event) -> None:
+        if event.mimeData().hasFormat('application/easynode-node-factory'):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event) -> None:
+        if event.mimeData().hasFormat('application/easynode-node-factory'):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event) -> None:
+        if event.mimeData().hasFormat('application/easynode-node-factory'):
+            data = event.mimeData().data(
+                'application/easynode-node-factory')
+            data = json.loads(bytes(data).decode())
+            node_factory_type = data['node_factory_type']
+            node_factory = self.scene().editor.factory_table.table[
+                node_factory_type]
+            node = node_factory.create_node()
+            self.scene().graph.add_node(node)
+            node.item.setPos(self.mapToScene(event.pos()))
+            event.acceptProposedAction()

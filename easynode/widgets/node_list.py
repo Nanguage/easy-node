@@ -1,5 +1,7 @@
 import typing as T
-from qtpy import QtWidgets, QtCore
+import json
+
+from qtpy import QtWidgets, QtCore, QtGui
 
 from ..utils import hex_color_add_alpha
 
@@ -12,6 +14,7 @@ class ListItem(QtWidgets.QWidget):
         super().__init__(parent=parent)
         self.node_factory = node_factory
         self.init_ui()
+        self.start_drag = False
 
     def init_ui(self):
         layout = QtWidgets.QHBoxLayout()
@@ -34,6 +37,28 @@ class ListItem(QtWidgets.QWidget):
         )
         layout.addWidget(self.title_label)
 
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.start_drag = True
+
+    def mouseMoveEvent(self, event):
+        if self.start_drag:
+            mime_data = QtCore.QMimeData()
+            data = {
+                'node_factory_type': self.node_factory.type_name()
+            }
+            mime_data.setData(
+                'application/easynode-node-factory',
+                bytes(json.dumps(data), encoding='utf-8')
+            )
+            drag = QtGui.QDrag(self)
+            drag.setMimeData(mime_data)
+            drag.exec_(QtCore.Qt.MoveAction)
+            self.start_drag = False
+
+    def mouseReleaseEvent(self, event):
+        self.start_drag = False
+
 
 class NodeList(QtWidgets.QWidget):
     def __init__(
@@ -52,11 +77,20 @@ class NodeList(QtWidgets.QWidget):
     def init_ui(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.setStyleSheet(
+            "background-color: #EE111111;"
+        )
+        m = 4
+        layout.setContentsMargins(m, m, m, m)
         layout.setSpacing(0)
 
         self.search_line_edit = QtWidgets.QLineEdit()
         self.search_line_edit.setPlaceholderText("Search for node...")
+        self.search_line_edit.setStyleSheet(
+            "background-color: #EE222222;"
+            "font-size: 15px;"
+            "height: 25px;"
+        )
         layout.addWidget(self.search_line_edit)
 
         self.scroll_area = QtWidgets.QScrollArea()
@@ -66,7 +100,10 @@ class NodeList(QtWidgets.QWidget):
             QtCore.Qt.ScrollBarAsNeeded)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setContentsMargins(0, 0, 0, 0)
-        self.scroll_area.setStyleSheet("border: 0px;")
+        self.scroll_area.setStyleSheet(
+            "border: 0px;"
+            "background-color: #EE111111;"
+        )
 
         self.scroll_widget = QtWidgets.QWidget()
         self.scroll_widget.setContentsMargins(0, 0, 0, 0)
