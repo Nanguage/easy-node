@@ -39,6 +39,7 @@ def get_install_requires():
     requirements = [
         "qtpy",
         "pyqtdarktheme",
+        "textdistance",
     ]
     return requirements
 

@@ -2,6 +2,7 @@ import typing as T
 import json
 
 from qtpy import QtWidgets, QtCore, QtGui
+import textdistance
 
 from ..utils import hex_color_add_alpha
 
@@ -69,8 +70,35 @@ class NodeList(QtWidgets.QWidget):
         self.node_factory_table = node_factory_table
         self.update_list()
 
+    def get_ordered_node_factories(self) -> T.List[T.Type["NodeFactory"]]:
+        search_text = self.search_line_edit.text()
+        if search_text == "":
+            return sorted(
+                self.node_factory_table.table.values(),
+                key=lambda x: x.type_name()
+            )
+        else:
+            # sort by similarity with search text
+            lcs_lengeth = [
+                len(
+                    textdistance.lcsseq(
+                        search_text.lower(), factory.type_name().lower())
+                )
+                for factory in self.node_factory_table.table.values()
+            ]
+            return [
+                factory for _, factory in sorted(
+                    zip(lcs_lengeth, self.node_factory_table.table.values()),
+                    key=lambda x: x[0],
+                    reverse=True
+                )
+            ]
+
     def update_list(self):
-        for node_factory in self.node_factory_table.table.values():
+        # clear list
+        for i in reversed(range(self.list_layout.count())):
+            self.list_layout.itemAt(i).widget().setParent(None)
+        for node_factory in self.get_ordered_node_factories():
             list_item = ListItem(node_factory=node_factory)
             self.list_layout.addWidget(list_item)
 
@@ -91,6 +119,8 @@ class NodeList(QtWidgets.QWidget):
             "font-size: 15px;"
             "height: 25px;"
         )
+        self.search_line_edit.textChanged.connect(
+            lambda: self.update_list())
         layout.addWidget(self.search_line_edit)
 
         self.scroll_area = QtWidgets.QScrollArea()
