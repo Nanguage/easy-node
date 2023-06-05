@@ -65,7 +65,6 @@ class NodeEditor(QtWidgets.QWidget):
 
     def add_scene_and_view(self):
         scene = GraphicsScene(self)
-        scene.editor = self
         view = GraphicsView(scene, self)
         self.scenes.append(scene)
         self.views.append(view)

@@ -23,6 +23,7 @@ class GraphicsViewSetting:
     zoom_in_factor: float = 1.25
     zoom_step: int = 1
     zoom_range: T.Tuple[int, int] = (0, 10)
+    node_list_widget_height: int = 200
 
 
 @dataclass
@@ -83,6 +84,22 @@ class EdgeItemSetting:
     width: float = 2.0
     width_selected: float = 2.0
     bazel: bool = True
+
+
+@dataclass
+class NodeListItemSetting:
+    font_size: float = 15.0
+    padding: float = 5.0
+
+
+@dataclass
+class NodeListWidgetSetting:
+    item_setting: NodeListItemSetting = NodeListItemSetting()
+    background_color: str = "#EE111111"
+    margin: float = 4.0
+    search_line_edit_height: float = 25.0
+    search_line_edit_background_color: str = "#EE222222"
+    search_line_edit_font_size: float = 15.0
 
 
 @dataclass

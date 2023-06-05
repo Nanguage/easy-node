@@ -4,6 +4,7 @@ from qtpy import QtWidgets
 
 from .model import Node, Port
 from .setting import NodeItemSetting
+from .widgets.node_list import NodeList
 
 
 class NodeFactory(object):
@@ -51,6 +52,5 @@ class NodeFactoryTable(object):
     def register(self, factory: T.Type[NodeFactory]) -> None:
         self.table[factory.type_name()] = factory
 
-    def create_node_list_widget(self) -> QtWidgets.QWidget:
-        from .widgets.node_list import NodeList
+    def create_node_list_widget(self) -> NodeList:
         return NodeList(node_factory_table=self)

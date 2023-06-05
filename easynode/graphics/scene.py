@@ -20,7 +20,7 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
             QtGui.QColor(self.setting.grid_color_dense))
         self.pen_grid_loose = QtGui.QPen(
             QtGui.QColor(self.setting.grid_color_loose))
-        self.editor: T.Optional["NodeEditor"] = None
+        self.editor = editor
         self.graph = Graph(self)
 
     @property

@@ -26,6 +26,15 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
         self._clicked_port_item: T.Optional[PortItem] = None
+        factory_table = self.scene().editor.factory_table
+        self.node_list_widget = factory_table.create_node_list_widget()
+        self.node_list_widget.setFixedHeight(
+            self.setting.node_list_widget_height)
+        self.node_list_widget_proxy = QtWidgets.QGraphicsProxyWidget()
+        self.node_list_widget_proxy.setWidget(self.node_list_widget)
+        self.node_list_widget_proxy.setZValue(1000)
+        self.scene().addItem(self.node_list_widget_proxy)
+        self.hide_node_list_widget()
 
     def scene(self) -> "GraphicsScene":
         return super().scene()
@@ -103,6 +112,9 @@ class GraphicsView(QtWidgets.QGraphicsView):
         item = self.itemAt(event.pos())
         if isinstance(item, PortItem):
             self._clicked_port_item = item
+        if (self.node_list_widget_proxy.isVisible()) and \
+           (item is not self.node_list_widget_proxy):
+            self.hide_node_list_widget()
         super().mousePressEvent(event)
 
     def left_mouse_button_release(self, event: QtGui.QMouseEvent):
@@ -123,7 +135,18 @@ class GraphicsView(QtWidgets.QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def right_mouse_button_press(self, event: QtGui.QMouseEvent):
+        item = self.itemAt(event.pos())
+        if item is None:
+            self.show_node_list_widget(event)
         super().mousePressEvent(event)
+
+    def show_node_list_widget(self, event: QtGui.QMouseEvent):
+        self.node_list_widget.update_list()
+        self.node_list_widget_proxy.setPos(event.pos())
+        self.node_list_widget_proxy.show()
+
+    def hide_node_list_widget(self):
+        self.node_list_widget_proxy.hide()
 
     def right_mouse_button_release(self, event: QtGui.QMouseEvent):
         super().mouseReleaseEvent(event)
@@ -173,21 +196,31 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         if not self.zoom_mode:
-            return super().wheelEvent(event)
-        zoom_range = self.setting.zoom_range
-        if event.angleDelta().y() > 0:
-            zoom_factor = self.setting.zoom_in_factor
-            self.current_zoom += self.setting.zoom_step
+            item = self.itemAt(event.pos())
+            if isinstance(item, QtWidgets.QGraphicsProxyWidget):
+                from ..widgets.node_list import NodeList  # type: ignore
+                widget = item.widget()
+                if isinstance(widget, NodeList):
+                    widget.scroll_area.wheelEvent(event)
+                else:
+                    super().wheelEvent(event)
+            else:
+                super().wheelEvent(event)
         else:
-            zoom_factor = 1 / self.setting.zoom_in_factor
-            self.current_zoom -= self.setting.zoom_step
-        clamped = False
-        if self.current_zoom < zoom_range[0]:
-            self.current_zoom, clamped = zoom_range[0], True
-        if self.current_zoom > zoom_range[1]:
-            self.current_zoom, clamped = zoom_range[1], True
-        if not clamped:
-            self.scale(zoom_factor, zoom_factor)
+            zoom_range = self.setting.zoom_range
+            if event.angleDelta().y() > 0:
+                zoom_factor = self.setting.zoom_in_factor
+                self.current_zoom += self.setting.zoom_step
+            else:
+                zoom_factor = 1 / self.setting.zoom_in_factor
+                self.current_zoom -= self.setting.zoom_step
+            clamped = False
+            if self.current_zoom < zoom_range[0]:
+                self.current_zoom, clamped = zoom_range[0], True
+            if self.current_zoom > zoom_range[1]:
+                self.current_zoom, clamped = zoom_range[1], True
+            if not clamped:
+                self.scale(zoom_factor, zoom_factor)
 
     def dragEnterEvent(self, event) -> None:
         if event.mimeData().hasFormat('application/easynode-node-factory'):

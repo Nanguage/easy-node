@@ -1,18 +1,26 @@
 import typing as T
 import json
+from functools import lru_cache
 
 from qtpy import QtWidgets, QtCore, QtGui
 import textdistance
 
 from ..utils import hex_color_add_alpha
+from ..setting import NodeListItemSetting, NodeListWidgetSetting
 
 if T.TYPE_CHECKING:
     from easynode.node_factory import NodeFactoryTable, NodeFactory
 
 
 class ListItem(QtWidgets.QWidget):
-    def __init__(self, node_factory: "NodeFactory", parent=None):
+    def __init__(
+            self, node_factory: "NodeFactory",
+            setting: T.Optional["NodeListItemSetting"] = None,
+            parent=None):
         super().__init__(parent=parent)
+        if setting is None:
+            setting = NodeListItemSetting()
+        self.setting = setting
         self.node_factory = node_factory
         self.init_ui()
         self.start_drag = False
@@ -29,8 +37,8 @@ class ListItem(QtWidgets.QWidget):
         self.title_label.setStyleSheet(
             "QLabel {"
             f"color: {theme_color};"
-            f"font-size: 15px;"
-            "padding: 5px;"
+            f"font-size: {self.setting.font_size}px;"
+            f"padding: {self.setting.padding}px;"
             "}"
             "QLabel:hover {"
             f"background-color: {theme_color_with_alpha};"
@@ -61,11 +69,20 @@ class ListItem(QtWidgets.QWidget):
         self.start_drag = False
 
 
+@lru_cache(maxsize=None)
+def lcs_length(s1: str, s2: str):
+    return len(textdistance.lcsseq(s1, s2))
+
+
 class NodeList(QtWidgets.QWidget):
     def __init__(
             self, node_factory_table: "NodeFactoryTable",
+            setting: T.Optional["NodeListWidgetSetting"] = None,
             parent=None):
         super().__init__(parent=parent)
+        if setting is None:
+            setting = NodeListWidgetSetting()
+        self.setting = setting
         self.init_ui()
         self.node_factory_table = node_factory_table
         self.update_list()
@@ -80,18 +97,17 @@ class NodeList(QtWidgets.QWidget):
         else:
             # sort by similarity with search text
             lcs_lengeth = [
-                len(
-                    textdistance.lcsseq(
-                        search_text.lower(), factory.type_name().lower())
-                )
+                lcs_length(
+                    search_text.lower(), factory.type_name().lower())
                 for factory in self.node_factory_table.table.values()
             ]
             return [
-                factory for _, factory in sorted(
+                factory for len, factory in sorted(
                     zip(lcs_lengeth, self.node_factory_table.table.values()),
                     key=lambda x: x[0],
                     reverse=True
                 )
+                if len > 0
             ]
 
     def update_list(self):
@@ -103,10 +119,11 @@ class NodeList(QtWidgets.QWidget):
             self.list_layout.addWidget(list_item)
 
     def init_ui(self):
+        background_color = self.setting.background_color
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
         self.setStyleSheet(
-            "background-color: #EE111111;"
+            f"background-color: {background_color};"
         )
         m = 4
         layout.setContentsMargins(m, m, m, m)
@@ -114,10 +131,11 @@ class NodeList(QtWidgets.QWidget):
 
         self.search_line_edit = QtWidgets.QLineEdit()
         self.search_line_edit.setPlaceholderText("Search for node...")
+        sl_background_color = self.setting.search_line_edit_background_color
         self.search_line_edit.setStyleSheet(
-            "background-color: #EE222222;"
-            "font-size: 15px;"
-            "height: 25px;"
+            f"background-color: {sl_background_color};"
+            f"font-size: {self.setting.search_line_edit_font_size}px;"
+            f"height: {self.setting.search_line_edit_height}px;"
         )
         self.search_line_edit.textChanged.connect(
             lambda: self.update_list())
@@ -132,7 +150,7 @@ class NodeList(QtWidgets.QWidget):
         self.scroll_area.setContentsMargins(0, 0, 0, 0)
         self.scroll_area.setStyleSheet(
             "border: 0px;"
-            "background-color: #EE111111;"
+            f"background-color: {background_color};"
         )
 
         self.scroll_widget = QtWidgets.QWidget()
