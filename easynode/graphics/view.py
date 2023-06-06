@@ -26,13 +26,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
         self._clicked_port_item: T.Optional[PortItem] = None
-        factory_table = self.scene().editor.factory_table
-        self.node_list_widget = factory_table.create_node_list_widget()
-        self.node_list_widget.setFixedHeight(
-            self.setting.node_list_widget_height)
-        self.node_list_widget_proxy = QtWidgets.QGraphicsProxyWidget()
-        self.node_list_widget_proxy.setWidget(self.node_list_widget)
-        self.node_list_widget_proxy.setZValue(1000)
+        self._right_clicked_pos: T.Optional[QtCore.QPointF] = None
+        self.init_node_list()
         self.scene().addItem(self.node_list_widget_proxy)
         self.hide_node_list_widget()
 
@@ -68,6 +63,17 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+
+    def init_node_list(self):
+        factory_table = self.scene().editor.factory_table
+        self.node_list_widget = factory_table.create_node_list_widget()
+        self.node_list_widget.setFixedHeight(
+            self.setting.node_list_widget_height)
+        self.node_list_widget.list.item_clicked.connect(
+            self.create_node_by_click)
+        self.node_list_widget_proxy = QtWidgets.QGraphicsProxyWidget()
+        self.node_list_widget_proxy.setWidget(self.node_list_widget)
+        self.node_list_widget_proxy.setZValue(1000)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
@@ -137,6 +143,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def right_mouse_button_press(self, event: QtGui.QMouseEvent):
         item = self.itemAt(event.pos())
         if item is None:
+            self._right_clicked_pos = event.pos()
             self.show_node_list_widget(event)
         super().mousePressEvent(event)
 
@@ -147,6 +154,19 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def hide_node_list_widget(self):
         self.node_list_widget_proxy.hide()
+
+    def create_node_by_click(self, factory_type_name: str):
+        if self._right_clicked_pos is not None:
+            self.create_node(
+                factory_type_name,
+                self.mapToScene(self._right_clicked_pos))
+            self.hide_node_list_widget()
+
+    def create_node(self, factory_type_name: str, pos: QtCore.QPointF):
+        factory = self.scene().editor.factory_table.table[factory_type_name]
+        node = factory.create_node()
+        self.scene().graph.add_node(node)
+        node.item.setPos(pos)
 
     def right_mouse_button_release(self, event: QtGui.QMouseEvent):
         super().mouseReleaseEvent(event)
@@ -236,9 +256,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
                 'application/easynode-node-factory')
             data = json.loads(bytes(data).decode())
             node_factory_type = data['node_factory_type']
-            node_factory = self.scene().editor.factory_table.table[
-                node_factory_type]
-            node = node_factory.create_node()
-            self.scene().graph.add_node(node)
-            node.item.setPos(self.mapToScene(event.pos()))
+            self.create_node(
+                node_factory_type,
+                self.mapToScene(event.pos()))
             event.acceptProposedAction()

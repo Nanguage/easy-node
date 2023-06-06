@@ -17,6 +17,8 @@ def lcs_length(s1: str, s2: str):
 
 
 class NodeListView(QtWidgets.QListView):
+    item_clicked = QtCore.Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setAcceptDrops(True)
@@ -26,6 +28,7 @@ class NodeListView(QtWidgets.QListView):
         if event.button() == QtCore.Qt.LeftButton:
             item = self.indexAt(event.pos())
             self.drag_item_name = item.data()
+            self.item_clicked.emit(item.data())
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
