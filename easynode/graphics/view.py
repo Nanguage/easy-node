@@ -201,7 +201,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
                 from ..widgets.node_list import NodeList  # type: ignore
                 widget = item.widget()
                 if isinstance(widget, NodeList):
-                    widget.scroll_area.wheelEvent(event)
+                    widget.list.wheelEvent(event)
                 else:
                     super().wheelEvent(event)
             else:

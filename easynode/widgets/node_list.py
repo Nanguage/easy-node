@@ -5,56 +5,34 @@ from functools import lru_cache
 from qtpy import QtWidgets, QtCore, QtGui
 import textdistance
 
-from ..utils import hex_color_add_alpha
-from ..setting import NodeListItemSetting, NodeListWidgetSetting
+from ..setting import NodeListWidgetSetting
 
 if T.TYPE_CHECKING:
     from easynode.node_factory import NodeFactoryTable, NodeFactory
 
 
-class ListItem(QtWidgets.QWidget):
-    def __init__(
-            self, node_factory: "NodeFactory",
-            setting: T.Optional["NodeListItemSetting"] = None,
-            parent=None):
+@lru_cache(maxsize=None)
+def lcs_length(s1: str, s2: str):
+    return len(textdistance.lcsseq(s1, s2))
+
+
+class NodeListView(QtWidgets.QListView):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
-        if setting is None:
-            setting = NodeListItemSetting()
-        self.setting = setting
-        self.node_factory = node_factory
-        self.init_ui()
-        self.start_drag = False
-
-    def init_ui(self):
-        layout = QtWidgets.QHBoxLayout()
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.title_label = QtWidgets.QLabel(self.node_factory.type_name())
-        theme_color = self.node_factory.theme_color
-        theme_color_with_alpha = hex_color_add_alpha(theme_color, 80)
-        self.title_label.setStyleSheet(
-            "QLabel {"
-            f"color: {theme_color};"
-            f"font-size: {self.setting.font_size}px;"
-            f"padding: {self.setting.padding}px;"
-            "}"
-            "QLabel:hover {"
-            f"background-color: {theme_color_with_alpha};"
-            "}"
-        )
-        layout.addWidget(self.title_label)
+        self.setAcceptDrops(True)
+        self.drag_item_name: T.Optional[str] = None
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
-            self.start_drag = True
+            item = self.indexAt(event.pos())
+            self.drag_item_name = item.data()
+        super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self.start_drag:
+        if self.drag_item_name is not None:
             mime_data = QtCore.QMimeData()
             data = {
-                'node_factory_type': self.node_factory.type_name()
+                'node_factory_type': self.drag_item_name
             }
             mime_data.setData(
                 'application/easynode-node-factory',
@@ -63,15 +41,7 @@ class ListItem(QtWidgets.QWidget):
             drag = QtGui.QDrag(self)
             drag.setMimeData(mime_data)
             drag.exec_(QtCore.Qt.MoveAction)
-            self.start_drag = False
-
-    def mouseReleaseEvent(self, event):
-        self.start_drag = False
-
-
-@lru_cache(maxsize=None)
-def lcs_length(s1: str, s2: str):
-    return len(textdistance.lcsseq(s1, s2))
+            self.drag_item_name = None
 
 
 class NodeList(QtWidgets.QWidget):
@@ -111,12 +81,25 @@ class NodeList(QtWidgets.QWidget):
             ]
 
     def update_list(self):
-        # clear list
-        for i in reversed(range(self.list_layout.count())):
-            self.list_layout.itemAt(i).widget().setParent(None)
+        model: QtGui.QStandardItemModel = self.list.model()
+        model.clear()
         for node_factory in self.get_ordered_node_factories():
-            list_item = ListItem(node_factory=node_factory)
-            self.list_layout.addWidget(list_item)
+            item = QtGui.QStandardItem()
+            item.setText(node_factory.type_name())
+            # set color
+            item.setData(
+                QtGui.QColor(node_factory.theme_color),
+                QtCore.Qt.ForegroundRole,
+            )
+            item.setFont(
+                QtGui.QFont(
+                    None,
+                    self.setting.item_setting.font_size,
+                )
+            )
+            item.setEditable(False)
+            item.setSelectable(False)
+            model.appendRow(item)
 
     def init_ui(self):
         background_color = self.setting.background_color
@@ -141,25 +124,18 @@ class NodeList(QtWidgets.QWidget):
             lambda: self.update_list())
         layout.addWidget(self.search_line_edit)
 
-        self.scroll_area = QtWidgets.QScrollArea()
-        self.scroll_area.setVerticalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAsNeeded)
-        self.scroll_area.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAsNeeded)
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setContentsMargins(0, 0, 0, 0)
-        self.scroll_area.setStyleSheet(
-            "border: 0px;"
-            f"background-color: {background_color};"
+        self.list = NodeListView()
+        self.list.setModel(QtGui.QStandardItemModel())
+        self.list.setStyleSheet(
+            """
+            QListView::item {{
+                padding: {}px;
+            }}
+            QListView {{
+                border: none;
+            }}
+            """.format(
+                self.setting.item_setting.padding,
+            )
         )
-
-        self.scroll_widget = QtWidgets.QWidget()
-        self.scroll_widget.setContentsMargins(0, 0, 0, 0)
-        self.scroll_widget.setStyleSheet("border: 0px;")
-        self.scroll_area.setWidget(self.scroll_widget)
-
-        self.list_layout = QtWidgets.QVBoxLayout()
-        self.list_layout.setContentsMargins(0, 0, 0, 0)
-        self.list_layout.setAlignment(QtCore.Qt.AlignTop)
-        self.scroll_widget.setLayout(self.list_layout)
-        layout.addWidget(self.scroll_area)
+        layout.addWidget(self.list)
