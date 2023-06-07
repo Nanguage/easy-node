@@ -25,9 +25,9 @@ class PortItem(QtWidgets.QGraphicsItem):
         self.setting = setting
         self.setAcceptHoverEvents(True)
         self.hovered = False
-        self.setup_pens_and_brushs()
+        self._setup_pens_and_brushs()
 
-    def setup_pens_and_brushs(self):
+    def _setup_pens_and_brushs(self):
         QColor = QtGui.QColor
         QPen = QtGui.QPen
         QBrush = QtGui.QBrush

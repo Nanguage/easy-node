@@ -56,11 +56,11 @@ class NodeList(QtWidgets.QWidget):
         if setting is None:
             setting = NodeListWidgetSetting()
         self.setting = setting
-        self.init_ui()
+        self._init_ui()
         self.node_factory_table = node_factory_table
         self.update_list()
 
-    def get_ordered_node_factories(
+    def _get_ordered_node_factories(
             self, thresh_ratio: float = 0.5
             ) -> T.List[T.Type["NodeFactory"]]:
         search_text = self.search_line_edit.text()
@@ -89,7 +89,7 @@ class NodeList(QtWidgets.QWidget):
     def update_list(self):
         model: QtGui.QStandardItemModel = self.list.model()
         model.clear()
-        for node_factory in self.get_ordered_node_factories():
+        for node_factory in self._get_ordered_node_factories():
             item = QtGui.QStandardItem()
             item.setText(node_factory.type_name())
             # set color
@@ -107,7 +107,7 @@ class NodeList(QtWidgets.QWidget):
             item.setSelectable(False)
             model.appendRow(item)
 
-    def init_ui(self):
+    def _init_ui(self):
         background_color = self.setting.background_color
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)

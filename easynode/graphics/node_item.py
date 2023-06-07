@@ -28,8 +28,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
             setting = NodeItemSetting()
         self.setting: NodeItemSetting = setting
         self.node = node
-        self.init_layout()
-        self.setup_pens_and_brushs()
+        self._init_layout()
+        self._setup_pens_and_brushs()
         self.painted = False
         self.setZValue(1)
         self._movement_state = MovementState.mouse_released
@@ -73,7 +73,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         return self.scene().itemAt(
             pos.x(), pos.y(), QtGui.QTransform())
 
-    def setup_pens_and_brushs(self):
+    def _setup_pens_and_brushs(self):
         QColor = QtGui.QColor
         QPen = QtGui.QPen
         QBrush = QtGui.QBrush
@@ -91,14 +91,14 @@ class NodeItem(QtWidgets.QGraphicsItem):
             for status, color in setting.status_to_color.items()
         }
 
-    def init_layout(self):
+    def _init_layout(self):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges)
-        self.init_content()
-        self.init_title()
+        self._init_content()
+        self._init_title()
 
-    def init_title(self):
+    def _init_title(self):
         title_color = QtGui.QColor(self.setting.title_color)
         title_font = QtGui.QFont(None, self.setting.title_font_size)
         self.title = QtWidgets.QGraphicsTextItem(self)
@@ -108,13 +108,13 @@ class NodeItem(QtWidgets.QGraphicsItem):
         padding = self.setting.title_padding
         self.title.setPos(padding, 0)
 
-    def init_content(self):
+    def _init_content(self):
         self.content_widget = widget = QtWidgets.QWidget()
         widget.setStyleSheet("background: transparent;")
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
-        self.init_ports(layout)
+        self._init_ports(layout)
         if self.node.widget is not None:
             self.node.widget.setParent(widget)
             self.node.widget.setContentsMargins(0, 0, 0, 0)
@@ -125,7 +125,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.widget_proxy = QtWidgets.QGraphicsProxyWidget(parent=self)
         self.widget_proxy.setWidget(widget)
 
-    def init_ports(self, layout: QtWidgets.QVBoxLayout):
+    def _init_ports(self, layout: QtWidgets.QVBoxLayout):
         in_ports = self.node.input_ports
         out_ports = self.node.output_ports
         ports_widget = QtWidgets.QWidget(parent=self.content_widget)
@@ -226,13 +226,13 @@ class NodeItem(QtWidgets.QGraphicsItem):
               widget: T.Optional[QtWidgets.QWidget] = None) -> None:
         if not self.painted:  # first paint
             self.painted = True
-            self.init_port_items()
-        self.paint_title(painter)
-        self.paint_status_bar(painter)
-        self.paint_body(painter)
-        self.paint_outline(painter)
+            self._init_port_items()
+        self._paint_title(painter)
+        self._paint_status_bar(painter)
+        self._paint_body(painter)
+        self._paint_outline(painter)
 
-    def paint_title(self, painter: QtGui.QPainter):
+    def _paint_title(self, painter: QtGui.QPainter):
         width = self.width
         height = self.setting.title_area_height
         outline_radius = self.setting.outline_radius
@@ -249,7 +249,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         painter.setBrush(self.brush_title_area)
         painter.drawPath(path_title.simplified())
 
-    def paint_status_bar(self, painter: QtGui.QPainter):
+    def _paint_status_bar(self, painter: QtGui.QPainter):
         height = self.setting.status_bar_height
         width = self.width
         title_height = self.setting.title_area_height
@@ -261,7 +261,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         painter.setBrush(self.brush_status[status])
         painter.drawPath(path_status_bar.simplified())
 
-    def paint_body(self, painter: QtGui.QPainter):
+    def _paint_body(self, painter: QtGui.QPainter):
         header_height = self.header_height
         width = self.width
         body_height = self.height - header_height
@@ -279,7 +279,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         painter.setBrush(self.brush_background)
         painter.drawPath(path_body.simplified())
 
-    def paint_outline(self, painter: QtGui.QPainter):
+    def _paint_outline(self, painter: QtGui.QPainter):
         width, height = self.size
         outline_radius = self.setting.outline_radius
         path_outline = QtGui.QPainterPath()
@@ -291,7 +291,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         painter.setBrush(QtCore.Qt.NoBrush)  # type: ignore
         painter.drawPath(path_outline)
 
-    def init_port_items(self):
+    def _init_port_items(self):
         in_ports = self.node.input_ports
         out_ports = self.node.output_ports
         for ports in [in_ports, out_ports]:

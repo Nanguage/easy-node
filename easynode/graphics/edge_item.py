@@ -15,9 +15,9 @@ class EdgeItemBase(QtWidgets.QGraphicsPathItem):
         if setting is None:
             setting = EdgeItemSetting()
         self.setting = setting
-        self.setup_pens_and_brushs()
+        self._setup_pens_and_brushs()
 
-    def setup_pens_and_brushs(self):
+    def _setup_pens_and_brushs(self):
         self._pen = QtGui.QPen(
             QtGui.QColor(self.setting.color),
             self.setting.width)
@@ -48,18 +48,18 @@ class EdgeItemBase(QtWidgets.QGraphicsPathItem):
     def update_path(self):
         is_bazel = self.setting.bazel
         if not is_bazel:
-            self.update_path_direct()
+            self._update_path_direct()
         else:
-            self.update_path_bazel()
+            self._update_path_bazel()
 
-    def update_path_direct(self):
+    def _update_path_direct(self):
         source_pos = self.source_pos
         target_pos = self.target_pos
         path = QtGui.QPainterPath(source_pos)
         path.lineTo(target_pos)
         self.setPath(path)
 
-    def update_path_bazel(self):
+    def _update_path_bazel(self):
         path = QtGui.QPainterPath()
         s = self.source_pos
         t = self.target_pos
