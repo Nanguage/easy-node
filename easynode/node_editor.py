@@ -35,7 +35,7 @@ class NodeEditor(QtWidgets.QWidget):
         else:
             return self.current_view.scene()
 
-    def create_node(self, type_name: str) -> Node:
+    def create_node(self, type_name) -> Node:
         factory = self.factory_table.table.get(type_name)
         if factory is None:
             raise ValueError(f"Node type {type_name} not found")

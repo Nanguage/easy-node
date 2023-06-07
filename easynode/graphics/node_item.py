@@ -1,4 +1,5 @@
 import typing as T
+from enum import Enum
 
 from qtpy import QtWidgets, QtGui, QtCore
 
@@ -8,6 +9,13 @@ from .port_item import PortItem
 
 if T.TYPE_CHECKING:
     from ..model import Node, Port  # type: ignore
+    from .view import GraphicsView
+
+
+class MovementState(Enum):
+    mouse_pressed = 0
+    mouse_released = 1
+    position_changed = 2
 
 
 class NodeItem(QtWidgets.QGraphicsItem):
@@ -24,19 +32,39 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.setup_pens_and_brushs()
         self.painted = False
         self.setZValue(1)
+        self._movement_state = MovementState.mouse_released
+        self._movement_start_pos = QtCore.QPointF(0, 0)
+
+    @property
+    def view(self) -> "GraphicsView":
+        return self.scene().views()[0]
 
     def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         child_item = self.get_item_at(event.scenePos())
         if isinstance(child_item, PortItem):
             child_item.mousePressEvent(event)
         else:
+            self._movement_state = MovementState.mouse_pressed
+            self._movement_start_pos = self.pos()
             super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+        if self._movement_state == MovementState.position_changed:
+            # TODO: allow undo many nodes at once
+            from ..command import NodeItemMoveCommand  # type: ignore
+            self.view.undo_stack.push(
+                NodeItemMoveCommand(
+                    self, self._movement_start_pos, self.pos()))
+        self._movement_state = MovementState.mouse_released
+        super().mouseReleaseEvent(event)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedChange:
             self.node.selected_changed.emit(value)
         elif change == QtWidgets.QGraphicsItem.ItemPositionChange:
             self.node.position_changed.emit(value)
+            if self._movement_state == MovementState.mouse_pressed:
+                self._movement_state = MovementState.position_changed
         return super().itemChange(change, value)
 
     def get_item_at(

@@ -24,6 +24,7 @@ class GraphicsViewSetting:
     zoom_step: int = 1
     zoom_range: T.Tuple[int, int] = (0, 10)
     node_list_widget_height: int = 300
+    undo_limit: int = 100
 
 
 @dataclass

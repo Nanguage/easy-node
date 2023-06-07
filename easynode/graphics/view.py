@@ -20,14 +20,16 @@ class GraphicsView(QtWidgets.QGraphicsView):
         super().__init__(parent)
         self.setting = scene.editor.setting.graphics_view_setting
         self.setScene(scene)
-        self.setup_layout()
+        self._setup_layout()
         self.current_zoom = 5
         self.zoom_mode = False
         self.edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
         self._clicked_port_item: T.Optional[PortItem] = None
         self._right_clicked_pos: T.Optional[QtCore.QPointF] = None
-        self.init_node_list()
+        self._init_node_list()
+        self._init_undo_stack()
+        self._init_shortcuts()
         self.scene().addItem(self.node_list_widget_proxy)
         self.hide_node_list_widget()
 
@@ -46,7 +48,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         else:
             self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
 
-    def setup_layout(self):
+    def _setup_layout(self):
         x, y = self.setting.default_slider_position
         self.verticalScrollBar().setSliderPosition(y)
         self.horizontalScrollBar().setSliderPosition(x)
@@ -64,7 +66,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
 
-    def init_node_list(self):
+    def _init_node_list(self):
         factory_table = self.scene().editor.factory_table
         self.node_list_widget = factory_table.create_node_list_widget()
         self.node_list_widget.setFixedHeight(
@@ -75,23 +77,43 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.node_list_widget_proxy.setWidget(self.node_list_widget)
         self.node_list_widget_proxy.setZValue(1000)
 
+    def _init_undo_stack(self):
+        self.undo_stack = QtWidgets.QUndoStack()
+        self.undo_stack.setUndoLimit(self.setting.undo_limit)
+
+    def _init_shortcuts(self):
+        undo_shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+Z"), self)
+        undo_shortcut.activated.connect(self._on_undo)
+        redo_shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+R"), self)
+        redo_shortcut.activated.connect(self._on_redo)
+
+    def _on_undo(self):
+        self.undo_stack.undo()
+        self.viewport().update()
+
+    def _on_redo(self):
+        self.undo_stack.redo()
+        self.viewport().update()
+
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
-            self.middle_mouse_button_press(event)
+            self._middle_mouse_button_press(event)
         elif event.button() == QtCore.Qt.LeftButton:  # type: ignore
-            self.left_mouse_button_press(event)
+            self._left_mouse_button_press(event)
         elif event.button() == QtCore.Qt.RightButton:  # type: ignore
-            self.right_mouse_button_press(event)
+            self._right_mouse_button_press(event)
         else:
             super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
-            self.middle_mouse_button_release(event)
+            self._middle_mouse_button_release(event)
         elif event.button() == QtCore.Qt.LeftButton:  # type: ignore
-            self.left_mouse_button_release(event)
+            self._left_mouse_button_release(event)
         elif event.button() == QtCore.Qt.RightButton:  # type: ignore
-            self.right_mouse_button_release(event)
+            self._right_mouse_button_release(event)
         else:
             return super().mouseReleaseEvent(event)
 
@@ -114,7 +136,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
                 self.edge_drag_mode = True
         return super().mouseMoveEvent(event)
 
-    def left_mouse_button_press(self, event: QtGui.QMouseEvent):
+    def _left_mouse_button_press(self, event: QtGui.QMouseEvent):
         item = self.itemAt(event.pos())
         if isinstance(item, PortItem):
             self._clicked_port_item = item
@@ -123,7 +145,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self.hide_node_list_widget()
         super().mousePressEvent(event)
 
-    def left_mouse_button_release(self, event: QtGui.QMouseEvent):
+    def _left_mouse_button_release(self, event: QtGui.QMouseEvent):
         if self._clicked_port_item is not None:
             self._clicked_port_item = None
         if self.edge_drag_mode:
@@ -140,7 +162,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self._edge_drag_item = None
         super().mouseReleaseEvent(event)
 
-    def right_mouse_button_press(self, event: QtGui.QMouseEvent):
+    def _right_mouse_button_press(self, event: QtGui.QMouseEvent):
         item = self.itemAt(event.pos())
         if item is None:
             self._right_clicked_pos = event.pos()
@@ -168,10 +190,10 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.scene().graph.add_node(node)
         node.item.setPos(pos)
 
-    def right_mouse_button_release(self, event: QtGui.QMouseEvent):
+    def _right_mouse_button_release(self, event: QtGui.QMouseEvent):
         super().mouseReleaseEvent(event)
 
-    def middle_mouse_button_press(self, event: QtGui.QMouseEvent):
+    def _middle_mouse_button_press(self, event: QtGui.QMouseEvent):
         fake_release_midele = QtGui.QMouseEvent(
             QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
             event.screenPos(), QtCore.Qt.MiddleButton,  # type: ignore
@@ -184,7 +206,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             event.modifiers())
         super().mousePressEvent(fake_press_left)
 
-    def middle_mouse_button_release(self, event: QtGui.QMouseEvent):
+    def _middle_mouse_button_release(self, event: QtGui.QMouseEvent):
         fake_release_left = QtGui.QMouseEvent(
             QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
             event.screenPos(), QtCore.Qt.LeftButton,  # type: ignore

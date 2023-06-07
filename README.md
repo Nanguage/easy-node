@@ -3,6 +3,9 @@
 Easynode is a Python package offering a suite of components for building Node editor-based GUI applications, characterized by its simplicity, configurability, and a decoupled design that separates interface display logic from node computation scheduling logic.
 
 
+**Work in progress**
+
+
 ## TODO list
 
 + [x] Auto layout.
@@ -12,7 +15,7 @@ Easynode is a Python package offering a suite of components for building Node ed
 + [x] Port widget for editing port value.
 + [x] Node factory and registration.
 + [x] Multiple scenes.
-+ [ ] Node list for search and add widget.
-+ [ ] Copy and paste.
++ [x] Node list for search and add widget.
 + [ ] Undo/Redo.
++ [ ] Copy and paste.
 + [ ] Node and port documentation.
