@@ -60,7 +60,9 @@ class NodeList(QtWidgets.QWidget):
         self.node_factory_table = node_factory_table
         self.update_list()
 
-    def get_ordered_node_factories(self) -> T.List[T.Type["NodeFactory"]]:
+    def get_ordered_node_factories(
+            self, thresh_ratio: float = 0.5
+            ) -> T.List[T.Type["NodeFactory"]]:
         search_text = self.search_line_edit.text()
         if search_text == "":
             return sorted(
@@ -69,19 +71,20 @@ class NodeList(QtWidgets.QWidget):
             )
         else:
             # sort by similarity with search text
-            lcs_lengeth = [
-                lcs_length(
+            factories = []
+            lens_lcs = []
+            for factory in self.node_factory_table.table.values():
+                len_lcs = lcs_length(
                     search_text.lower(), factory.type_name().lower())
-                for factory in self.node_factory_table.table.values()
-            ]
-            return [
-                factory for len, factory in sorted(
-                    zip(lcs_lengeth, self.node_factory_table.table.values()),
-                    key=lambda x: x[0],
-                    reverse=True
-                )
-                if len > 0
-            ]
+                if (len_lcs / len(search_text)) > thresh_ratio:
+                    lens_lcs.append(len_lcs)
+                    factories.append(factory)
+            lens_lcs, factories = zip(*sorted(
+                zip(lens_lcs, factories),
+                key=lambda x: x[0],
+                reverse=True,
+            ))
+            return list(factories)
 
     def update_list(self):
         model: QtGui.QStandardItemModel = self.list.model()
