@@ -51,7 +51,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
     def mouseReleaseEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         if self._movement_state == MovementState.position_changed:
             pos_diff = self.pos() - self._movement_start_pos
-            self.view.selected_items_moved.emit(pos_diff)
+            self.view.selected_node_items_moved.emit(pos_diff)
         self._movement_state = MovementState.mouse_released
         super().mouseReleaseEvent(event)
 

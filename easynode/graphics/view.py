@@ -12,7 +12,7 @@ if T.TYPE_CHECKING:
 
 
 class GraphicsView(QtWidgets.QGraphicsView):
-    selected_items_moved = QtCore.Signal(QtCore.QPointF)
+    selected_node_items_moved = QtCore.Signal(QtCore.QPointF)
 
     def __init__(
             self,
@@ -101,7 +101,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.viewport().update()
 
     def _wire_signals(self):
-        self.selected_items_moved.connect(self._on_selected_items_moved)
+        self.selected_node_items_moved.connect(
+            self._on_selected_node_items_moved)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
@@ -242,9 +243,12 @@ class GraphicsView(QtWidgets.QGraphicsView):
                 edge = item.edge
                 graph.remove_edge(edge)
 
-    def _on_selected_items_moved(self, diff: QtCore.QPointF):
+    def _on_selected_node_items_moved(self, diff: QtCore.QPointF):
         from ..command import NodeItemsMoveCommand  # type: ignore
-        items = self.scene().selectedItems()
+        items = [
+            item for item in self.scene().selectedItems()
+            if isinstance(item, NodeItem)
+        ]
         command = NodeItemsMoveCommand(items, diff)
         self.undo_stack.push(command)
 
