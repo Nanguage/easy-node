@@ -7,21 +7,52 @@ if T.TYPE_CHECKING:
 
 
 class FlowCommand(QtWidgets.QUndoCommand):
-    pass
-
-
-class NodeItemMoveCommand(FlowCommand):
-    def __init__(
-            self, node_item: "NodeItem",
-            pos_old: QtCore.QPointF,
-            pos_new: QtCore.QPointF,):
+    def __init__(self):
         super().__init__()
-        self.node_item = node_item
-        self.pos_old = pos_old
-        self.pos_new = pos_new
-
-    def undo(self):
-        self.node_item.setPos(self.pos_old)
+        self._first_redo = True
 
     def redo(self):
-        self.node_item.setPos(self.pos_new)
+        # skip first redo,
+        # because it will be called when command is pushed
+        if self._first_redo:
+            self._first_redo = False
+            return
+        self._redo()
+
+    def _redo(self):
+        pass
+
+    def undo(self):
+        self._undo()
+
+    def _undo(self):
+        pass
+
+
+class NodeItemsMoveCommand(FlowCommand):
+    def __init__(
+            self, node_items: T.List["NodeItem"],
+            pos_diff: QtCore.QPointF):
+        super().__init__()
+        self.items = node_items
+        self.pos_diff = pos_diff
+
+    def _undo(self):
+        group = self.create_items_group()
+        group.setPos(-self.pos_diff)
+        self.destroy_items_group(group)
+
+    def _redo(self):
+        group = self.create_items_group()
+        group.setPos(self.pos_diff)
+        self.destroy_items_group(group)
+
+    @property
+    def scene(self):
+        return self.items[0].scene()
+
+    def create_items_group(self):
+        return self.scene.createItemGroup(self.items)
+
+    def destroy_items_group(self, group):
+        self.scene.destroyItemGroup(group)

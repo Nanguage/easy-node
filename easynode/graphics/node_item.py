@@ -50,11 +50,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
     def mouseReleaseEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         if self._movement_state == MovementState.position_changed:
-            # TODO: allow undo many nodes at once
-            from ..command import NodeItemMoveCommand  # type: ignore
-            self.view.undo_stack.push(
-                NodeItemMoveCommand(
-                    self, self._movement_start_pos, self.pos()))
+            pos_diff = self.pos() - self._movement_start_pos
+            self.view.selected_items_moved.emit(pos_diff)
         self._movement_state = MovementState.mouse_released
         super().mouseReleaseEvent(event)
 

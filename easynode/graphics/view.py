@@ -12,6 +12,8 @@ if T.TYPE_CHECKING:
 
 
 class GraphicsView(QtWidgets.QGraphicsView):
+    selected_items_moved = QtCore.Signal(QtCore.QPointF)
+
     def __init__(
             self,
             scene: "GraphicsScene",
@@ -30,6 +32,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self._init_node_list()
         self._init_undo_stack()
         self._init_shortcuts()
+        self._wire_signals()
         self.scene().addItem(self.node_list_widget_proxy)
         self.hide_node_list_widget()
 
@@ -96,6 +99,9 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def _on_redo(self):
         self.undo_stack.redo()
         self.viewport().update()
+
+    def _wire_signals(self):
+        self.selected_items_moved.connect(self._on_selected_items_moved)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.MiddleButton:  # type: ignore
@@ -235,6 +241,12 @@ class GraphicsView(QtWidgets.QGraphicsView):
             elif isinstance(item, EdgeItem):
                 edge = item.edge
                 graph.remove_edge(edge)
+
+    def _on_selected_items_moved(self, diff: QtCore.QPointF):
+        from ..command import NodeItemsMoveCommand  # type: ignore
+        items = self.scene().selectedItems()
+        command = NodeItemsMoveCommand(items, diff)
+        self.undo_stack.push(command)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         if not self.zoom_mode:
