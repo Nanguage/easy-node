@@ -22,10 +22,13 @@ class Graph:
         self.nodes.append(node)
         if self.scene:
             setting = self.scene.editor.setting.node_item_setting
-            node.create_item(setting)
+            if node.item is None:
+                node.create_item(setting)
             self.scene.addItem(node.item)
 
     def remove_node(self, node: Node):
+        if node not in self.nodes:
+            return
         self.nodes.remove(node)
         if self.scene:
             self.scene.removeItem(node.item)
@@ -44,10 +47,13 @@ class Graph:
         edge.target_port.edge_added.emit(edge)
         if self.scene:
             setting = self.scene.editor.setting.edge_item_setting
-            edge.create_item(setting)
+            if edge.item is None:
+                edge.create_item(setting)
             self.scene.addItem(edge.item)
 
     def remove_edge(self, edge: Edge):
+        if edge not in self.edges:
+            return
         self.edges.remove(edge)
         edge.source_port.edge_removed.emit(edge)
         edge.target_port.edge_removed.emit(edge)

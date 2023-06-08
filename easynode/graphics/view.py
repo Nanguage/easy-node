@@ -238,14 +238,17 @@ class GraphicsView(QtWidgets.QGraphicsView):
         super().keyReleaseEvent(event)
 
     def remove_selected_items(self):
+        from ..command import RemoveItemsCommand  # type: ignore
         graph = self.scene().graph
-        for item in self.scene().selectedItems():
+        items = self.scene().selectedItems()
+        for item in items:
             if isinstance(item, NodeItem):
                 node = item.node
                 graph.remove_node(node)
             elif isinstance(item, EdgeItem):
                 edge = item.edge
                 graph.remove_edge(edge)
+        self.undo_stack.push(RemoveItemsCommand(self, items))
 
     def _on_selected_node_items_moved(self, diff: QtCore.QPointF):
         from ..command import NodeItemsMoveCommand  # type: ignore
@@ -253,7 +256,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             item for item in self.scene().selectedItems()
             if isinstance(item, NodeItem)
         ]
-        command = NodeItemsMoveCommand(items, diff)
+        command = NodeItemsMoveCommand(self, items, diff)
         self.undo_stack.push(command)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
