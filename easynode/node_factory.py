@@ -54,3 +54,6 @@ class NodeFactoryTable(object):
 
     def create_node_list_widget(self) -> NodeList:
         return NodeList(node_factory_table=self)
+
+    def __getitem__(self, key: str) -> T.Type[NodeFactory]:
+        return self.table[key]

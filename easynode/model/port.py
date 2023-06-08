@@ -1,10 +1,16 @@
 import typing as T
+from dataclasses import asdict
 
 from qtpy import QtCore, QtWidgets
 
 from ..graphics.port_item import PortItem
 from .edge import Edge
 from ..setting import PortSetting
+from ..widgets.port_widget import (
+    PortWidget,
+    TextPortWidget, IntPortWidget,
+    FloatPortWidget,
+)
 
 if T.TYPE_CHECKING:
     from .node import Node
@@ -75,6 +81,22 @@ class Port(QtCore.QObject):
             item.setPos(node_item.width, y)
         self.item = item
 
+    def serialize(self) -> T.Dict[str, T.Any]:
+        return {
+            "name": self.name,
+            "type": self.type,
+            "setting": asdict(self.setting),
+        }
+
+    @classmethod
+    def deserialize(
+            cls, data: T.Dict[str, T.Any],
+            ) -> "Port":
+        setting = PortSetting(**data["setting"])
+        port = cls(data["name"], setting)
+        port.type = data["type"]
+        return port
+
 
 class DataPort(Port):
     def __init__(
@@ -90,7 +112,7 @@ class DataPort(Port):
         self.data_range = data_range
         self.data_default = data_default
         self.widget_args = widget_args
-        self.widget: T.Optional[QtWidgets.QWidget] = None
+        self.widget: T.Optional[PortWidget] = None
 
     def blueprint_copy(self) -> "DataPort":
         return DataPort(
@@ -112,18 +134,44 @@ class DataPort(Port):
             self.widget.setEnabled(True)
 
     def get_port_widget(self) -> QtWidgets.QWidget:
-        from ..widgets.port_widget import (
-            TextPortWidget, IntPortWidget,
-            FloatPortWidget,
-        )
         kwargs = self.widget_args or {}
         if self.data_type is str:
-            self.widget = TextPortWidget(self, **kwargs)
+            self.widget = TextPortWidget(self, kwargs)
         elif self.data_type is int:
-            self.widget = IntPortWidget(self, **kwargs)
+            self.widget = IntPortWidget(self, kwargs)
         elif self.data_type is float:
-            self.widget = FloatPortWidget(self, **kwargs)
+            self.widget = FloatPortWidget(self, kwargs)
         else:
             self.data_default = None
-            self.widget = TextPortWidget(self, **kwargs)
+            self.widget = TextPortWidget(self, kwargs)
         return self.widget
+
+    def serialize(self) -> T.Dict[str, T.Any]:
+        data = super().serialize()
+        widget_value = None
+        if self.widget is not None:
+            widget_value = self.widget.value
+        data.update({
+            "data_type": self.data_type.__name__,
+            "data_range": self.data_range,
+            "data_default": self.data_default,
+            "widget_args": self.widget_args,
+            "widget_value": widget_value,
+        })
+        return data
+
+    @classmethod
+    def deserialize(
+            cls, data: T.Dict[str, T.Any],
+            ) -> "DataPort":
+        setting = PortSetting(**data["setting"])
+        port = cls(
+            data["name"],
+            data['data_type'],
+            data['data_range'],
+            data['data_default'],
+            data['widget_args'],
+            setting,
+        )
+        port.type = data["type"]
+        return port
