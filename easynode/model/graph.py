@@ -22,9 +22,8 @@ class Graph:
         self.nodes.append(node)
         if self.scene:
             setting = self.scene.editor.setting.node_item_setting
-            node.create_item(self.scene)
-            if node.item_setting is None:
-                node.item_setting = setting
+            node.create_item(setting)
+            self.scene.addItem(node.item)
 
     def remove_node(self, node: Node):
         self.nodes.remove(node)
@@ -44,10 +43,9 @@ class Graph:
         edge.source_port.edge_added.emit(edge)
         edge.target_port.edge_added.emit(edge)
         if self.scene:
-            edge.create_item(self.scene)
             setting = self.scene.editor.setting.edge_item_setting
-            if edge.item_setting is None:
-                edge.item_setting = setting
+            edge.create_item(setting)
+            self.scene.addItem(edge.item)
 
     def remove_edge(self, edge: Edge):
         self.edges.remove(edge)
@@ -58,15 +56,13 @@ class Graph:
 
     def create_items(self):
         if self.scene:
-            editor_setting = self.scene.editor.setting
+            es = self.scene.editor.setting
             for node in self.nodes:
-                node.create_item(self.scene)
-                if node.item_setting is None:
-                    node.item_setting = editor_setting.node_item_setting
+                node.create_item(es.node_item_setting)
+                self.scene.addItem(node.item)
             for edge in self.edges:
-                edge.create_item(self.scene)
-                if edge.item_setting is None:
-                    edge.item_setting = editor_setting.edge_item_setting
+                edge.create_item(es.edge_item_setting)
+                self.scene.addItem(edge.item)
 
     def auto_layout(
             self,

@@ -7,7 +7,6 @@ from ..setting import EdgeItemSetting
 
 if T.TYPE_CHECKING:
     from .port import Port
-    from ..graphics.scene import GraphicsScene
     from .graph import Graph
 
 
@@ -25,12 +24,16 @@ class Edge(QtCore.QObject):
         self.graph: T.Optional["Graph"] = None
         self.item_setting = item_setting
 
-    def create_item(self, scene: "GraphicsScene"):
-        item = EdgeItem(self, None, self.item_setting)
-        scene.addItem(item)
+    def create_item(
+            self,
+            setting: T.Optional[EdgeItemSetting] = None,
+            ) -> "EdgeItem":
+        setting = self.item_setting or setting
+        item = EdgeItem(self, None, setting)
         if self.source_port.item is not None:
             item.update_path()
         self.item = item
+        return item
 
     def __eq__(self, other):
         return (

@@ -293,4 +293,4 @@ class NodeItem(QtWidgets.QGraphicsItem):
         out_ports = self.node.output_ports
         for ports in [in_ports, out_ports]:
             for port in ports:
-                port.create_item(self.scene())
+                port.create_item()

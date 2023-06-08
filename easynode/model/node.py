@@ -68,14 +68,18 @@ class Node(QtCore.QObject):
         cls_name = self.__class__.__name__
         return f"{cls_name}({self.title})"
 
-    def create_item(self, scene: "GraphicsScene"):
-        item = NodeItem(None, self, self.item_setting)
+    def create_item(
+            self,
+            setting: T.Optional[NodeItemSetting] = None
+            ) -> "NodeItem":
+        setting = self.item_setting or setting
+        item = NodeItem(None, self, setting)
         if 'pos' in self.attrs:
             pos = self.attrs['pos']
             assert isinstance(pos, tuple)
             item.setPos(*pos)
-        scene.addItem(item)
         self.item = item
+        return item
 
     @property
     def input_edges(self) -> T.List["Edge"]:

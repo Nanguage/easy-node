@@ -8,7 +8,6 @@ from ..setting import PortSetting
 
 if T.TYPE_CHECKING:
     from .node import Node
-    from ..graphics.scene import GraphicsScene
 
 
 class Port(QtCore.QObject):
@@ -58,7 +57,7 @@ class Port(QtCore.QObject):
         else:
             return self.node.output_ports.index(self)
 
-    def create_item(self, scene: "GraphicsScene"):
+    def create_item(self):
         assert self.node is not None
         node_item = self.node.item
         assert node_item is not None
