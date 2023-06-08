@@ -17,9 +17,10 @@ class GraphicsSceneSetting:
 @dataclass
 class GraphicsViewSetting:
     antialiasing: bool = True
+    open_gl: bool = False
     default_slider_position: T.Tuple[int, int] = (1, 1)
     hidden_sliders: bool = True
-    full_view_update: bool = True
+    full_view_update: bool = False
     zoom_in_factor: float = 1.25
     zoom_step: int = 1
     zoom_range: T.Tuple[int, int] = (0, 10)

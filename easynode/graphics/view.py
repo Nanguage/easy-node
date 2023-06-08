@@ -22,30 +22,28 @@ class GraphicsView(QtWidgets.QGraphicsView):
         super().__init__(parent)
         self.setting = scene.editor.setting.graphics_view_setting
         self.setScene(scene)
-        self._setup_layout()
-        self.current_zoom = 5
-        self.zoom_mode = False
-        self.edge_drag_mode = False
+        self._current_zoom = 5
+        self._zoom_mode = False
+        self._edge_drag_mode = False
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
         self._clicked_port_item: T.Optional[PortItem] = None
         self._right_clicked_pos: T.Optional[QtCore.QPointF] = None
+        self._setup_layout()
         self._init_node_list()
         self._init_undo_stack()
         self._init_shortcuts()
         self._wire_signals()
-        self.scene().addItem(self.node_list_widget_proxy)
-        self.hide_node_list_widget()
 
     def scene(self) -> "GraphicsScene":
         return super().scene()
 
     @property
-    def edge_drag_mode(self) -> bool:
-        return self._edge_drag_mode
+    def _edge_drag_mode(self) -> bool:
+        return self.__edge_drag_mode
 
-    @edge_drag_mode.setter
-    def edge_drag_mode(self, value: bool) -> None:
-        self._edge_drag_mode = value
+    @_edge_drag_mode.setter
+    def _edge_drag_mode(self, value: bool) -> None:
+        self.__edge_drag_mode = value
         if value:
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
         else:
@@ -67,6 +65,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         if self.setting.hidden_sliders:
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        if self.setting.open_gl:
+            self.setViewport(QtWidgets.QOpenGLWidget())
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
 
     def _init_node_list(self):
@@ -79,6 +79,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.node_list_widget_proxy = QtWidgets.QGraphicsProxyWidget()
         self.node_list_widget_proxy.setWidget(self.node_list_widget)
         self.node_list_widget_proxy.setZValue(1000)
+        self.scene().addItem(self.node_list_widget_proxy)
+        self.hide_node_list_widget()
 
     def _init_undo_stack(self):
         self.undo_stack = QtWidgets.QUndoStack()
@@ -125,7 +127,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             return super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
-        if self.edge_drag_mode:
+        if self._edge_drag_mode:
             if self._edge_drag_item is None:
                 item = self._clicked_port_item
                 assert item is not None
@@ -140,7 +142,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
                 self.scene().update()
         else:
             if self._clicked_port_item is not None:
-                self.edge_drag_mode = True
+                self._edge_drag_mode = True
         return super().mouseMoveEvent(event)
 
     def _left_mouse_button_press(self, event: QtGui.QMouseEvent):
@@ -155,8 +157,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def _left_mouse_button_release(self, event: QtGui.QMouseEvent):
         if self._clicked_port_item is not None:
             self._clicked_port_item = None
-        if self.edge_drag_mode:
-            self.edge_drag_mode = False
+        if self._edge_drag_mode:
+            self._edge_drag_mode = False
             assert self._edge_drag_item is not None
             stop_item = self.itemAt(event.pos())
             if isinstance(stop_item, PortItem):
@@ -178,7 +180,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def show_node_list_widget(self, event: QtGui.QMouseEvent):
         self.node_list_widget.update_list()
-        self.node_list_widget_proxy.setPos(event.pos())
+        pos = self.mapToScene(event.pos())
+        self.node_list_widget_proxy.setPos(pos)
         self.node_list_widget_proxy.show()
 
     def hide_node_list_widget(self):
@@ -195,6 +198,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         factory = self.scene().editor.factory_table.table[factory_type_name]
         node = factory.create_node()
         self.scene().graph.add_node(node)
+        node.item.content_widget.setFocus()
         node.item.setPos(pos)
 
     def _right_mouse_button_release(self, event: QtGui.QMouseEvent):
@@ -223,14 +227,14 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Control:  # type: ignore
-            self.zoom_mode = True
+            self._zoom_mode = True
         if event.key() == QtCore.Qt.Key_Delete:  # type: ignore
             self.remove_selected_items()
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Control:  # type: ignore
-            self.zoom_mode = False
+            self._zoom_mode = False
         super().keyReleaseEvent(event)
 
     def remove_selected_items(self):
@@ -253,7 +257,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.undo_stack.push(command)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
-        if not self.zoom_mode:
+        if not self._zoom_mode:
             item = self.itemAt(event.pos())
             if isinstance(item, QtWidgets.QGraphicsProxyWidget):
                 from ..widgets.node_list import NodeList  # type: ignore
@@ -268,15 +272,15 @@ class GraphicsView(QtWidgets.QGraphicsView):
             zoom_range = self.setting.zoom_range
             if event.angleDelta().y() > 0:
                 zoom_factor = self.setting.zoom_in_factor
-                self.current_zoom += self.setting.zoom_step
+                self._current_zoom += self.setting.zoom_step
             else:
                 zoom_factor = 1 / self.setting.zoom_in_factor
-                self.current_zoom -= self.setting.zoom_step
+                self._current_zoom -= self.setting.zoom_step
             clamped = False
-            if self.current_zoom < zoom_range[0]:
-                self.current_zoom, clamped = zoom_range[0], True
-            if self.current_zoom > zoom_range[1]:
-                self.current_zoom, clamped = zoom_range[1], True
+            if self._current_zoom < zoom_range[0]:
+                self._current_zoom, clamped = zoom_range[0], True
+            if self._current_zoom > zoom_range[1]:
+                self._current_zoom, clamped = zoom_range[1], True
             if not clamped:
                 self.scale(zoom_factor, zoom_factor)
 
