@@ -8,6 +8,8 @@ from .graphics.edge_item import EdgeItem
 if T.TYPE_CHECKING:
     from .graphics.scene import GraphicsScene
     from .graphics.view import GraphicsView
+    from .model.edge import Edge
+    from .model.node import Node
 
 
 class FlowCommand(QtWidgets.QUndoCommand):
@@ -88,3 +90,33 @@ class RemoveItemsCommand(FlowItemsCommand):
                 self.scene.graph.remove_node(item.node)
             elif isinstance(item, EdgeItem):
                 self.scene.graph.remove_edge(item.edge)
+
+
+class CreateEdgeCommand(FlowCommand):
+    def __init__(
+            self, view: "GraphicsView",
+            edge: "Edge",
+            ):
+        super().__init__(view)
+        self.edge = edge
+
+    def _undo(self):
+        self.scene.graph.remove_edge(self.edge)
+
+    def _redo(self):
+        self.scene.graph.add_edge(self.edge)
+
+
+class CreateNodeCommand(FlowCommand):
+    def __init__(
+            self, view: "GraphicsView",
+            node: "Node",
+            ):
+        super().__init__(view)
+        self.node = node
+
+    def _undo(self):
+        self.scene.graph.remove_node(self.node)
+
+    def _redo(self):
+        self.scene.graph.add_node(self.node)

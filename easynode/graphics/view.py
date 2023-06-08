@@ -162,9 +162,12 @@ class GraphicsView(QtWidgets.QGraphicsView):
             assert self._edge_drag_item is not None
             stop_item = self.itemAt(event.pos())
             if isinstance(stop_item, PortItem):
+                from ..command import CreateEdgeCommand  # type: ignore
                 try:
                     new_edge = self._edge_drag_item.create_edge(stop_item.port)
                     self.scene().graph.add_edge(new_edge)
+                    self.undo_stack.push(
+                        CreateEdgeCommand(self, new_edge))
                 except Exception as e:
                     print(e)
             self.scene().removeItem(self._edge_drag_item)
@@ -200,6 +203,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.scene().graph.add_node(node)
         node.item.content_widget.setFocus()
         node.item.setPos(pos)
+        from ..command import CreateNodeCommand  # type: ignore
+        self.undo_stack.push(CreateNodeCommand(self, node))
 
     def _right_mouse_button_release(self, event: QtGui.QMouseEvent):
         super().mouseReleaseEvent(event)
