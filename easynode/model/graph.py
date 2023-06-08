@@ -1,5 +1,4 @@
 import typing as T
-from copy import copy
 
 from .node import Node
 from .edge import Edge
@@ -32,12 +31,8 @@ class Graph:
         self.nodes.remove(node)
         if self.scene:
             self.scene.removeItem(node.item)
-        for port in node.input_ports:
-            for edge in copy(port.edges):
-                self.remove_edge(edge)
-        for port in node.output_ports:
-            for edge in copy(port.edges):
-                self.remove_edge(edge)
+        for edge in node.input_edges + node.output_edges:
+            self.remove_edge(edge)
 
     def add_edge(self, edge: Edge):
         if edge in self.edges:

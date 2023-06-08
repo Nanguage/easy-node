@@ -240,15 +240,23 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def remove_selected_items(self):
         from ..command import RemoveItemsCommand  # type: ignore
         graph = self.scene().graph
+        deleted_items = set()  # remove deleted items
         items = self.scene().selectedItems()
         for item in items:
             if isinstance(item, NodeItem):
                 node = item.node
+                for edge in node.input_edges + node.output_edges:
+                    # mark connected edges
+                    deleted_items.add(edge.item)
+                deleted_items.add(node.item)
                 graph.remove_node(node)
             elif isinstance(item, EdgeItem):
                 edge = item.edge
+                deleted_items.add(edge.item)
                 graph.remove_edge(edge)
-        self.undo_stack.push(RemoveItemsCommand(self, items))
+        deleted_items = list(deleted_items)
+        self.undo_stack.push(
+            RemoveItemsCommand(self, deleted_items))
 
     def _on_selected_node_items_moved(self, diff: QtCore.QPointF):
         from ..command import NodeItemsMoveCommand  # type: ignore
