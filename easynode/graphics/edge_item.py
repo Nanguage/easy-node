@@ -38,11 +38,11 @@ class EdgeItemBase(QtWidgets.QGraphicsPathItem):
             pen.setStyle(QtCore.Qt.SolidLine)  # type: ignore
 
     @property
-    def source_pos(self) -> QtCore.QPointF:
+    def source_pos(self) -> QtCore.QPointF:  # type: ignore
         pass
 
     @property
-    def target_pos(self) -> QtCore.QPointF:
+    def target_pos(self) -> QtCore.QPointF:  # type: ignore
         pass
 
     def update_path(self):
@@ -132,11 +132,13 @@ class EdgeItem(EdgeItemBase):
 class EdgeDragItem(EdgeItemBase):
     def __init__(
             self, fixed_port: "Port",
-            parent: QtWidgets.QGraphicsItem,
+            parent: T.Optional[QtWidgets.QGraphicsItem] = None,
             setting: T.Optional[EdgeItemSetting] = None
             ) -> None:
         super().__init__(parent, setting)
         self.fixed_port = fixed_port
+        assert fixed_port.item is not None
+        self._fixed_item = fixed_port.item
         self.movable_pos = fixed_port.item.scenePos()
 
     @property
@@ -144,13 +146,13 @@ class EdgeDragItem(EdgeItemBase):
         if self.fixed_port.type == "in":
             pos = self.movable_pos
         else:
-            pos = self.fixed_port.item.scenePos()
+            pos = self._fixed_item.scenePos()
         return pos
 
     @property
     def target_pos(self) -> QtCore.QPointF:
         if self.fixed_port.type == "in":
-            pos = self.fixed_port.item.scenePos()
+            pos = self._fixed_item.scenePos()
         else:
             pos = self.movable_pos
         return pos

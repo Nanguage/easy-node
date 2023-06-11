@@ -20,8 +20,9 @@ class MovementState(Enum):
 
 class NodeItem(QtWidgets.QGraphicsItem):
     def __init__(
-            self, parent: QtWidgets.QWidget,
+            self,
             node: "Node",
+            parent: T.Optional[QtWidgets.QGraphicsItem] = None,
             setting: T.Optional[NodeItemSetting] = None):
         super().__init__(parent=parent)
         if setting is None:
@@ -96,13 +97,16 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self._init_title()
 
     def _init_title(self):
-        title_color = QtGui.QColor(self.setting.title_color)
-        title_font = QtGui.QFont(None, self.setting.title_font_size)
+        setting = self.setting
+        title_color = QtGui.QColor(setting.title_color)
+        title_font = QtGui.QFont(
+            setting.title_font_family,
+            setting.title_font_size)
         self.title = QtWidgets.QGraphicsTextItem(self)
         self.title.setDefaultTextColor(title_color)
         self.title.setFont(title_font)
         self.title.setPlainText(self.node.title)
-        padding = self.setting.title_padding
+        padding = setting.title_padding
         self.title.setPos(padding, 0)
 
     def _init_content(self):
@@ -162,7 +166,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
         align_left = QtCore.Qt.AlignLeft  # type: ignore
         align_right = QtCore.Qt.AlignRight  # type: ignore
         align_v_center = QtCore.Qt.AlignVCenter  # type: ignore
-        padding = self.setting.port_setting.item_setting.radius
+        setting = self.setting.port_setting
+        padding = setting.item_setting.radius
         port_label = QtWidgets.QLabel(port.name)
         if tp == 'in':
             port_label.setAlignment(align_left | align_v_center)
@@ -173,7 +178,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
             port_label.setStyleSheet(
                 f"padding-right: {padding + 3}px; color: white;")
         font = QtGui.QFont(
-            'Arial', self.setting.port_setting.label_font_size)
+            setting.label_font_family,
+            setting.label_font_size)
         port_label.setFont(font)
         return port_label
 

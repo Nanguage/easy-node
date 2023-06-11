@@ -7,6 +7,11 @@ from .edge_item import EdgeDragItem
 from .edge_item import EdgeItem
 from .node_item import NodeItem
 
+try:
+    from qtpy.QtWidgets import QUndoStack
+except ImportError:
+    from qtpy.QtGui import QUndoStack  # type: ignore
+
 if T.TYPE_CHECKING:
     from .scene import GraphicsScene
 
@@ -35,7 +40,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self._wire_signals()
 
     def scene(self) -> "GraphicsScene":
-        return super().scene()
+        return super().scene()  # type: ignore
 
     @property
     def _edge_drag_mode(self) -> bool:
@@ -83,7 +88,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.hide_node_list_widget()
 
     def _init_undo_stack(self):
-        self.undo_stack = QtWidgets.QUndoStack()
+        self.undo_stack = QUndoStack()
         self.undo_stack.setUndoLimit(self.setting.undo_limit)
 
     def _init_shortcuts(self):
@@ -191,6 +196,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self.node_list_widget_proxy.hide()
 
     def create_node_by_click(self, factory_type_name: str):
+        if factory_type_name == '':
+            return
         if self._right_clicked_pos is not None:
             self.create_node(
                 factory_type_name,
@@ -201,6 +208,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         factory = self.scene().editor.factory_table.table[factory_type_name]
         node = factory.create_node()
         self.scene().graph.add_node(node)
+        assert node.item is not None
         node.item.content_widget.setFocus()
         node.item.setPos(pos)
         from ..command import CreateNodeCommand  # type: ignore

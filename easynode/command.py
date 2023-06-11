@@ -41,8 +41,6 @@ class FlowCommand(QtWidgets.QUndoCommand):
 
 
 class FlowItemsCommand(FlowCommand):
-    items: T.List[QtWidgets.QGraphicsItem]
-
     def create_items_group(self):
         return self.scene.createItemGroup(self.items)
 
@@ -56,7 +54,7 @@ class NodeItemsMoveCommand(FlowItemsCommand):
             node_items: T.List["NodeItem"],
             pos_diff: QtCore.QPointF):
         super().__init__(view)
-        self.items = node_items
+        self.items: T.List[NodeItem] = node_items
         self.pos_diff = pos_diff
 
     def _undo(self):

@@ -20,16 +20,23 @@ class Graph:
     def add_node(self, node: Node):
         self.nodes.append(node)
         if self.scene:
-            setting = self.scene.editor.setting.node_item_setting
+            editor = self.scene.editor  # type: ignore
+            setting = editor.setting.node_item_setting
             if node.item is None:
                 node.create_item(setting)
+            assert node.item is not None
             self.scene.addItem(node.item)
+
+    def add_nodes(self, *nodes: Node):
+        for node in nodes:
+            self.add_node(node)
 
     def remove_node(self, node: Node):
         if node not in self.nodes:
             return
         self.nodes.remove(node)
         if self.scene:
+            assert node.item is not None
             self.scene.removeItem(node.item)
         for edge in node.input_edges + node.output_edges:
             self.remove_edge(edge)
@@ -41,10 +48,16 @@ class Graph:
         edge.source_port.edge_added.emit(edge)
         edge.target_port.edge_added.emit(edge)
         if self.scene:
-            setting = self.scene.editor.setting.edge_item_setting
+            editor = self.scene.editor  # type: ignore
+            setting = editor.setting.edge_item_setting
             if edge.item is None:
                 edge.create_item(setting)
+            assert edge.item is not None
             self.scene.addItem(edge.item)
+
+    def add_edges(self, *edges: Edge):
+        for edge in edges:
+            self.add_edge(edge)
 
     def remove_edge(self, edge: Edge):
         if edge not in self.edges:
@@ -53,6 +66,7 @@ class Graph:
         edge.source_port.edge_removed.emit(edge)
         edge.target_port.edge_removed.emit(edge)
         if self.scene:
+            assert edge.item is not None
             self.scene.removeItem(edge.item)
 
     def create_items(self):

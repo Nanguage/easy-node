@@ -73,7 +73,7 @@ class Node(QtCore.QObject):
             setting: T.Optional[NodeItemSetting] = None
             ) -> "NodeItem":
         setting = self.item_setting or setting
-        item = NodeItem(None, self, setting)
+        item = NodeItem(self, None, setting)
         if 'pos' in self.attrs:
             pos = self.attrs['pos']
             assert isinstance(pos, tuple)
@@ -117,7 +117,7 @@ class Node(QtCore.QObject):
             scene: "GraphicsScene",
             data: T.Dict[str, T.Any],
             ) -> "Node":
-        editor = scene.editor
+        editor = scene.editor  # type: ignore
         type_name = data['type_name']
         if type_name in editor.factory_table:
             factory = editor.factory_table[type_name]

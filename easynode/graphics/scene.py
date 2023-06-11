@@ -65,6 +65,6 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
                     lines_loose.append(line)
 
             painter.setPen(self.pen_grid_dense)
-            painter.drawLines(lines_dense)
+            painter.drawLines(lines_dense)  # type: ignore
             painter.setPen(self.pen_grid_loose)
-            painter.drawLines(lines_loose)
+            painter.drawLines(lines_loose)  # type: ignore

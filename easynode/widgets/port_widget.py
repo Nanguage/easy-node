@@ -24,7 +24,7 @@ class PortWidget(QtWidgets.QWidget):
         self.setFixedHeight(int(self.setting.height))
         self.setFixedWidth(int(self.setting.width))
 
-    def get_widget(self, **kwargs) -> QtWidgets.QWidget:
+    def get_widget(self, **kwargs) -> QtWidgets.QWidget:  # type: ignore
         pass
 
     @property

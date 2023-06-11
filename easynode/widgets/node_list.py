@@ -19,7 +19,9 @@ def lcs_length(s1: str, s2: str):
 class NodeListView(QtWidgets.QListView):
     item_clicked = QtCore.Signal(str)
 
-    def __init__(self, parent=None):
+    def __init__(
+            self,
+            parent: T.Optional[QtWidgets.QWidget] = None):
         super().__init__(parent=parent)
         self.setAcceptDrops(True)
         self.drag_item_name: T.Optional[str] = None
@@ -86,7 +88,7 @@ class NodeList(QtWidgets.QWidget):
             ))
             return list(factories)
 
-    def update_list(self):
+    def update_list(self) -> None:
         model: QtGui.QStandardItemModel = self.list.model()
         model.clear()
         for node_factory in self._get_ordered_node_factories():
@@ -95,11 +97,11 @@ class NodeList(QtWidgets.QWidget):
             # set color
             item.setData(
                 QtGui.QColor(node_factory.theme_color),
-                QtCore.Qt.ForegroundRole,
+                QtCore.Qt.ForegroundRole,  # type: ignore
             )
             item.setFont(
                 QtGui.QFont(
-                    None,
+                    self.setting.item_setting.font_family,
                     self.setting.item_setting.font_size,
                 )
             )
@@ -135,13 +137,16 @@ class NodeList(QtWidgets.QWidget):
         self.list.setStyleSheet(
             """
             QListView::item {{
-                padding: {}px;
+                padding: {padding}px;
+            }}
+            QListView::item:hover {{
+                padding: {padding}px;
             }}
             QListView {{
                 border: none;
             }}
             """.format(
-                self.setting.item_setting.padding,
+                padding=self.setting.item_setting.padding,
             )
         )
         layout.addWidget(self.list)
