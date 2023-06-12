@@ -1,5 +1,6 @@
 import typing as T
 from qtpy import QtWidgets, QtCore
+from qtpy.QtCore import Qt
 
 if T.TYPE_CHECKING:
     from ..model.port import DataPort
@@ -48,6 +49,8 @@ class TextPortWidget(PortWidget):
 
     def get_widget(self, **kwargs) -> QtWidgets.QLineEdit:
         widget = QtWidgets.QLineEdit(**kwargs)
+        widget.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.NoContextMenu)
         widget.editingFinished.connect(  # type: ignore
             self.on_editing_finished)
         if self.port.data_default is not None:
@@ -79,6 +82,8 @@ class IntPortWidget(PortWidget):
 
     def get_widget(self, **kwargs) -> QtWidgets.QSpinBox:
         widget = QtWidgets.QSpinBox(**kwargs)
+        widget.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.NoContextMenu)
         if self.port.data_default is not None:
             assert isinstance(self.port.data_default, int)
             widget.setValue(self.port.data_default)
@@ -114,6 +119,8 @@ class FloatPortWidget(PortWidget):
 
     def get_widget(self, **kwargs) -> QtWidgets.QDoubleSpinBox:
         widget = QtWidgets.QDoubleSpinBox(**kwargs)
+        widget.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.NoContextMenu)
         if self.port.data_default is not None:
             assert isinstance(self.port.data_default, float)
             widget.setValue(self.port.data_default)

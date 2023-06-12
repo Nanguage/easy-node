@@ -23,7 +23,8 @@ class TestNode1(NodeFactory):
 class TestNode2(NodeFactory):
     input_ports = [
         DataPort(name="in1", data_type=int, data_range=(0, 100)),
-        DataPort(name="in2", data_type=float, data_default=2.0)
+        DataPort(name="in2", data_type=float, data_default=2.0),
+        DataPort(name="in3", data_type=str)
     ]
     output_ports = [
         Port(name="out1"),

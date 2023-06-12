@@ -49,6 +49,26 @@ class NodeListView(QtWidgets.QListView):
             self.drag_item_name = None
 
 
+class SearchLine(QtWidgets.QLineEdit):
+    def __init__(
+            self,
+            parent: "NodeList"):
+        setting = parent.setting
+        super().__init__(parent=parent)
+        self.setPlaceholderText("Search for node...")
+        sl_background_color = setting.search_line_edit_background_color
+        self.setStyleSheet(
+            f"background-color: {sl_background_color};"
+            f"font-size: {setting.search_line_edit_font_size}px;"
+            f"height: {setting.search_line_edit_height}px;"
+        )
+        self.textChanged.connect(
+            lambda: parent.update_list())
+
+    def contextMenuEvent(self, event) -> None:
+        pass
+
+
 class NodeList(QtWidgets.QWidget):
     def __init__(
             self, node_factory_table: "NodeFactoryTable",
@@ -81,6 +101,8 @@ class NodeList(QtWidgets.QWidget):
                 if (len_lcs / len(search_text)) > thresh_ratio:
                     lens_lcs.append(len_lcs)
                     factories.append(factory)
+            if len(factories) == 0:
+                return []
             lens_lcs, factories = zip(*sorted(
                 zip(lens_lcs, factories),
                 key=lambda x: x[0],
@@ -120,16 +142,7 @@ class NodeList(QtWidgets.QWidget):
         layout.setContentsMargins(m, m, m, m)
         layout.setSpacing(0)
 
-        self.search_line_edit = QtWidgets.QLineEdit()
-        self.search_line_edit.setPlaceholderText("Search for node...")
-        sl_background_color = self.setting.search_line_edit_background_color
-        self.search_line_edit.setStyleSheet(
-            f"background-color: {sl_background_color};"
-            f"font-size: {self.setting.search_line_edit_font_size}px;"
-            f"height: {self.setting.search_line_edit_height}px;"
-        )
-        self.search_line_edit.textChanged.connect(
-            lambda: self.update_list())
+        self.search_line_edit = SearchLine(self)
         layout.addWidget(self.search_line_edit)
 
         self.list = NodeListView()

@@ -17,6 +17,15 @@ class EdgeItemBase(QtWidgets.QGraphicsPathItem):
         self.setting = setting
         self._setup_pens_and_brushs()
 
+    def boundingRect(self) -> QtCore.QRectF:
+        try:
+            s_pos = self.source_pos
+            t_pos = self.target_pos
+        except AssertionError:
+            return QtCore.QRectF()
+        return QtCore.QRectF(
+            s_pos, t_pos).normalized()
+
     def _setup_pens_and_brushs(self):
         self._pen = QtGui.QPen(
             QtGui.QColor(self.setting.color),
@@ -156,10 +165,6 @@ class EdgeDragItem(EdgeItemBase):
         else:
             pos = self.movable_pos
         return pos
-
-    def boundingRect(self) -> QtCore.QRectF:
-        return QtCore.QRectF(
-            self.source_pos, self.target_pos).normalized()
 
     def create_edge(self, movable_port: "Port") -> "Edge":
         from ..model import Edge  # type: ignore
