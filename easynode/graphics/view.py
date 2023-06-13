@@ -98,6 +98,49 @@ class GraphicsView(QtWidgets.QGraphicsView):
         redo_shortcut = QtWidgets.QShortcut(
             QtGui.QKeySequence("Ctrl+R"), self)
         redo_shortcut.activated.connect(self._on_redo)
+        copy_shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+C"), self)
+        copy_shortcut.activated.connect(self.copy_selected_items)
+        paste_shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+V"), self)
+        paste_shortcut.activated.connect(self.paste_copied_items)
+
+    def copy_selected_items(self):
+        app = QtWidgets.QApplication.instance()
+        clipboard = app.clipboard()
+        data = self.serialize_selected_items()
+        clipboard.setText(data)
+
+    def serialize_selected_items(self) -> str:
+        from ..utils.serialization import serialize_subgraph  # type: ignore
+        items = self.scene().selectedItems()
+        nodes = []
+        for item in items:
+            if isinstance(item, NodeItem):
+                node = item.node
+                nodes.append(node)
+        sub_graph = self.scene().graph.sub_graph(nodes)
+        dict_ = serialize_subgraph(sub_graph)
+        data = json.dumps(dict_)
+        return data
+
+    def paste_copied_items(self):
+        app = QtWidgets.QApplication.instance()
+        clipboard = app.clipboard()
+        data_str = clipboard.text()
+        try:
+            data = json.loads(data_str)
+            data_type = data['type']
+            if data_type == 'subgraph':
+                from ..utils.serialization import deserialize_subgraph
+                sub_graph = deserialize_subgraph(
+                    data, self.scene().editor)
+                print(sub_graph)
+        except Exception as e:
+            import traceback
+            print(e)
+            traceback.print_exc()
+            return
 
     def _on_undo(self):
         self.undo_stack.undo()

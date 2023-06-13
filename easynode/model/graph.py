@@ -94,16 +94,16 @@ class Graph:
         else:
             raise ValueError("Scene is not set")
 
+    def sub_graph(self, nodes: T.List[Node]) -> "SubGraph":
+        return SubGraph(nodes)
+
 
 class SubGraph:
     def __init__(
-            self, graph: "Graph",
+            self,
             nodes: T.List[Node],
             ) -> None:
-        self.graph = graph
         self.nodes = nodes
-        assert all(node in graph.nodes for node in nodes), \
-            "All nodes must be in graph"
         self.edges = self.get_edges()
 
     def get_edges(self) -> T.List[Edge]:

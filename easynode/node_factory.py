@@ -57,3 +57,6 @@ class NodeFactoryTable(object):
 
     def __getitem__(self, key: str) -> T.Type[NodeFactory]:
         return self.table[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.table

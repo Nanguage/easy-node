@@ -46,4 +46,4 @@ graph.add_edges(e1, e2)
 graph.auto_layout()
 
 editor.show()
-app.exec()
+app.exec_()

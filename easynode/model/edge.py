@@ -35,8 +35,20 @@ class Edge(QtCore.QObject):
         self.item = item
         return item
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Edge):
+            return NotImplemented
         return (
-            self.source_port == other.source_port and
-            self.target_port == other.target_port
+            (self.source_port == other.source_port) and
+            (self.target_port == other.target_port)
         )
+
+    def __hash__(self):
+        s_port = self.source_port
+        t_port = self.target_port
+        s_node = s_port.node
+        t_node = t_port.node
+        return hash((
+            (id(s_node), s_port.index),
+            (id(t_node), t_port.index)
+        ))

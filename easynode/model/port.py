@@ -1,5 +1,4 @@
 import typing as T
-from dataclasses import asdict
 
 from qtpy import QtCore, QtWidgets
 
@@ -81,22 +80,6 @@ class Port(QtCore.QObject):
             item.setPos(node_item.width, y)
         self.item = item
 
-    def serialize(self) -> T.Dict[str, T.Any]:
-        return {
-            "name": self.name,
-            "type": self.type,
-            "setting": asdict(self.setting),
-        }
-
-    @classmethod
-    def deserialize(
-            cls, data: T.Dict[str, T.Any],
-            ) -> "Port":
-        setting = PortSetting(**data["setting"])
-        port = cls(data["name"], setting)
-        port.type = data["type"]
-        return port
-
 
 class DataPort(Port):
     def __init__(
@@ -145,33 +128,3 @@ class DataPort(Port):
             self.data_default = None
             self.widget = TextPortWidget(self, kwargs)
         return self.widget
-
-    def serialize(self) -> T.Dict[str, T.Any]:
-        data = super().serialize()
-        widget_value = None
-        if self.widget is not None:
-            widget_value = self.widget.value
-        data.update({
-            "data_type": self.data_type.__name__,
-            "data_range": self.data_range,
-            "data_default": self.data_default,
-            "widget_args": self.widget_args,
-            "widget_value": widget_value,
-        })
-        return data
-
-    @classmethod
-    def deserialize(
-            cls, data: T.Dict[str, T.Any],
-            ) -> "DataPort":
-        setting = PortSetting(**data["setting"])
-        port = cls(
-            data["name"],
-            data['data_type'],
-            data['data_range'],
-            data['data_default'],
-            data['widget_args'],
-            setting,
-        )
-        port.type = data["type"]
-        return port
