@@ -1,4 +1,5 @@
 import typing as T
+from qtpy import QtCore
 
 from .node import Node
 from .edge import Edge
@@ -115,3 +116,26 @@ class SubGraph:
                 if (s_node in self.nodes) and (t_node in self.nodes):
                     edges.add(edge)
         return list(edges)
+
+    def join(
+            self,
+            graph: Graph,
+            pos: T.Optional[QtCore.QPointF] = None,
+            ) -> None:
+        graph.add_nodes(*self.nodes)
+        if pos is not None:
+            for node in self.nodes:
+                assert node.item is not None
+                attr_pos = node.attrs.get("pos")
+                if attr_pos is None:
+                    p = QtCore.QPointF(*attr_pos)
+                    node.item.setPos(p)
+                new_pos = node.item.pos() + pos
+                node.item.setPos(new_pos)
+        graph.add_edges(*self.edges)
+        scene = graph.scene
+        assert scene is not None
+        scene.clearSelection()
+        for node in self.nodes:
+            assert node.item is not None
+            node.item.setSelected(True)

@@ -6,6 +6,7 @@ from .port_item import PortItem
 from .edge_item import EdgeDragItem
 from .edge_item import EdgeItem
 from .node_item import NodeItem
+from ..utils.serialization import deserialize_subgraph
 
 try:
     from qtpy.QtWidgets import QUndoStack
@@ -33,6 +34,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         self._edge_drag_item: T.Optional[EdgeDragItem] = None
         self._clicked_port_item: T.Optional[PortItem] = None
         self._right_clicked_pos: T.Optional[QtCore.QPointF] = None
+        self._mouse_pos: QtCore.QPointF = QtCore.QPointF(0.0, 0.0)
         self._setup_layout()
         self._init_node_list()
         self._init_undo_stack()
@@ -132,10 +134,11 @@ class GraphicsView(QtWidgets.QGraphicsView):
             data = json.loads(data_str)
             data_type = data['type']
             if data_type == 'subgraph':
-                from ..utils.serialization import deserialize_subgraph
                 sub_graph = deserialize_subgraph(
                     data, self.scene().editor)
-                print(sub_graph)
+                graph = self.scene().graph
+                pos = self.mapToScene(self._mouse_pos)
+                sub_graph.join(graph, pos)
         except Exception as e:
             import traceback
             print(e)
@@ -191,6 +194,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         else:
             if self._clicked_port_item is not None:
                 self._edge_drag_mode = True
+        self._mouse_pos = event.pos()
         return super().mouseMoveEvent(event)
 
     def _left_mouse_button_press(self, event: QtGui.QMouseEvent):
