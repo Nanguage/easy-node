@@ -50,7 +50,7 @@ def deserialize_port(
 def serialize_node(node: "Node") -> T.Dict[str, T.Any]:
     attrs = node.attrs.copy()
     if node.item is not None:
-        attrs['pos'] = (node.item.pos().x(), node.item.pos().y())
+        attrs['pos'] = [node.item.pos().x(), node.item.pos().y()]
     setting = None
     if node.item_setting is not None:
         setting = asdict(node.item_setting)

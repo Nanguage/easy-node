@@ -117,6 +117,13 @@ class SubGraph:
                     edges.add(edge)
         return list(edges)
 
+    def _get_nodes_item_bounding_rect(self) -> QtCore.QRectF:
+        rect = QtCore.QRectF()
+        for node in self.nodes:
+            assert node.item is not None
+            rect = rect.united(node.item.sceneBoundingRect())
+        return rect
+
     def join(
             self,
             graph: Graph,
@@ -124,13 +131,16 @@ class SubGraph:
             ) -> None:
         graph.add_nodes(*self.nodes)
         if pos is not None:
+            bounding_rect = self._get_nodes_item_bounding_rect()
+            top_left = bounding_rect.topLeft()
             for node in self.nodes:
                 assert node.item is not None
                 attr_pos = node.attrs.get("pos")
-                if attr_pos is None:
+                if attr_pos is not None:
                     p = QtCore.QPointF(*attr_pos)
                     node.item.setPos(p)
-                new_pos = node.item.pos() + pos
+                offset = node.item.pos() - top_left
+                new_pos = pos + offset
                 node.item.setPos(new_pos)
         graph.add_edges(*self.edges)
         scene = graph.scene

@@ -38,6 +38,7 @@ class Node(QtCore.QObject):
         self.graph: T.Optional["GraphicsScene"] = None
         self.item_setting = item_setting
         self.attrs = attrs
+        self.position_changed.connect(self._on_position_changed)
 
     def init_ports(
             self,
@@ -54,6 +55,10 @@ class Node(QtCore.QObject):
             for port in ports:
                 port.type = tp
                 port.node = self
+
+    def _on_position_changed(self, pos: QtCore.QPointF):
+        pos_attr = [pos.x(), pos.y()]
+        self.attrs['pos'] = pos_attr
 
     @property
     def id(self) -> int:
@@ -75,7 +80,7 @@ class Node(QtCore.QObject):
         item = NodeItem(self, None, setting)
         if 'pos' in self.attrs:
             pos = self.attrs['pos']
-            assert isinstance(pos, tuple)
+            assert isinstance(pos, list)
             item.setPos(*pos)
         self.item = item
         return item
