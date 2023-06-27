@@ -118,3 +118,26 @@ class CreateNodeCommand(FlowCommand):
 
     def _redo(self):
         self.scene.graph.add_node(self.node)
+
+
+class PasteSubgraphCommand(FlowCommand):
+    def __init__(
+            self, view: "GraphicsView",
+            nodes: T.List["Node"],
+            edges: T.List["Edge"],
+            ):
+        super().__init__(view)
+        self.nodes = nodes
+        self.edges = edges
+
+    def _undo(self):
+        for node in self.nodes:
+            self.scene.graph.remove_node(node)
+        for edge in self.edges:
+            self.scene.graph.remove_edge(edge)
+
+    def _redo(self):
+        for node in self.nodes:
+            self.scene.graph.add_node(node)
+        for edge in self.edges:
+            self.scene.graph.add_edge(edge)

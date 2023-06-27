@@ -139,6 +139,10 @@ class GraphicsView(QtWidgets.QGraphicsView):
                 graph = self.scene().graph
                 pos = self.mapToScene(self._mouse_pos)
                 sub_graph.join(graph, pos)
+                from ..command import PasteSubgraphCommand  # type: ignore
+                self.undo_stack.push(
+                    PasteSubgraphCommand(
+                        self, sub_graph.nodes, sub_graph.edges))
         except Exception as e:
             import traceback
             print(e)
