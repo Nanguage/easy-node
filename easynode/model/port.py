@@ -28,7 +28,7 @@ class Port(QtCore.QObject):
         self.node: T.Optional["Node"] = None
         self.item: T.Optional["PortItem"] = None
         self.type: T.Optional[str] = None
-        self.edges: T.List["Edge"] = []
+        self.edges: T.Set["Edge"] = set()
         self.edge_added.connect(self.on_edge_added)
         self.edge_removed.connect(self.on_edge_removed)
         self._setting = setting
@@ -48,7 +48,7 @@ class Port(QtCore.QObject):
                 return PortSetting()
 
     def on_edge_added(self, edge: Edge):
-        self.edges.append(edge)
+        self.edges.add(edge)
 
     def on_edge_removed(self, edge: Edge):
         self.edges.remove(edge)
