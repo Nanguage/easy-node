@@ -8,6 +8,7 @@ from .setting import EditorSetting
 from .node_factory import NodeFactoryTable
 from .widgets.custom_tab import CustomTabWidget
 from .model.node import Node
+from .model.graph import Graph
 
 
 class NodeEditor(QtWidgets.QWidget):
@@ -94,3 +95,11 @@ class NodeEditor(QtWidgets.QWidget):
                 pass
         else:
             app.setStyleSheet(style_sheet)  # type: ignore
+
+    def load_graph(self, data_str: str):
+        Graph.deserialize(data_str, self, add_to_editor=True)
+
+    def load_graph_from_json_file(self, file_path: str):
+        with open(file_path, 'r') as f:
+            data_str = f.read()
+        self.load_graph(data_str)

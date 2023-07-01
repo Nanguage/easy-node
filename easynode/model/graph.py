@@ -1,12 +1,18 @@
 import typing as T
 from qtpy import QtCore
+import json
 
 from .node import Node
 from .edge import Edge
 from ..utils import layout_graph
+from ..utils.serialization import (
+    serialize_nodes_and_edges,
+    deserialize_graph
+)
 
 if T.TYPE_CHECKING:
     from ..graphics.scene import GraphicsScene
+    from ..node_editor import NodeEditor
 
 
 class Graph:
@@ -97,6 +103,19 @@ class Graph:
 
     def sub_graph(self, nodes: T.List[Node]) -> "SubGraph":
         return SubGraph(nodes)
+
+    def serialize(self) -> str:
+        data = serialize_nodes_and_edges(self.nodes, self.edges)
+        return json.dumps(data)
+
+    @staticmethod
+    def deserialize(
+            data_str: str,
+            editor: "NodeEditor",
+            add_to_editor: bool = True,
+            ) -> 'Graph':
+        data = json.loads(data_str)
+        return deserialize_graph(data, editor, add_to_editor)
 
 
 class SubGraph:

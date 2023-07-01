@@ -62,7 +62,7 @@ class SearchLine(QtWidgets.QLineEdit):
             f"font-size: {setting.search_line_edit_font_size}px;"
             f"height: {setting.search_line_edit_height}px;"
         )
-        self.textChanged.connect(
+        self.textChanged.connect(  # type: ignore
             lambda: parent.update_list())
 
     def contextMenuEvent(self, event) -> None:

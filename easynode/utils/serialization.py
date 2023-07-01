@@ -6,7 +6,7 @@ if T.TYPE_CHECKING:
     from ..model.port import Port, DataPort
     from ..model.node import Node
     from ..model.edge import Edge
-    from ..model.graph import SubGraph
+    from ..model.graph import SubGraph, Graph
 
 
 def serialize_port(port: "Port") -> T.Dict[str, T.Any]:
@@ -201,3 +201,21 @@ def deserialize_subgraph(
     from ..model.graph import SubGraph
     nodes, _ = deserialize_nodes_and_edges(data, editor)
     return SubGraph(nodes)
+
+
+def deserialize_graph(
+        data: T.Dict[str, T.Any],
+        editor: "NodeEditor",
+        add_to_editor: bool = True,
+        ) -> "Graph":
+    nodes, edges = deserialize_nodes_and_edges(data, editor)
+    if add_to_editor:
+        editor.add_scene_and_view()
+        scene = editor.current_scene
+        graph = scene.graph
+    else:
+        from ..model.graph import Graph
+        graph = Graph()
+    graph.add_nodes(*nodes)
+    graph.add_edges(*edges)
+    return graph
