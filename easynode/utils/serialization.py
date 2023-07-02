@@ -34,8 +34,8 @@ def deserialize_port(
         data: T.Dict[str, T.Any],
         ) -> T.Union["Port", "DataPort"]:
     from ..model.port import Port, DataPort
-    from ..setting import PortSetting
-    setting = PortSetting(**data["setting"])
+    from ..setting import PortSetting, dataclass_from_dict
+    setting = dataclass_from_dict(PortSetting, data["setting"])
     port: T.Union["Port", "DataPort"]
     if "data_type" in data:
         port = DataPort(
@@ -92,10 +92,11 @@ def deserialize_node_with_factory(
 def deserialize_node_with_data(
         data: T.Dict[str, T.Any],
         ) -> "Node":
-    from ..setting import NodeItemSetting
+    from ..setting import NodeItemSetting, dataclass_from_dict
+    from ..model.node import Node
     setting = None
-    if data is not None:
-        setting = NodeItemSetting(**data)
+    if data['setting'] is not None:
+        setting = dataclass_from_dict(NodeItemSetting, data['setting'])
     input_ports = _deserialize_ports(data['input_ports'])
     output_ports = _deserialize_ports(data['output_ports'])
     node = Node(

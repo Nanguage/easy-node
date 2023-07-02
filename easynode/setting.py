@@ -1,5 +1,5 @@
 import typing as T
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 
 
 @dataclass
@@ -114,3 +114,16 @@ class EditorSetting:
     node_item_setting: NodeItemSetting = NodeItemSetting()
     edge_item_setting: EdgeItemSetting = EdgeItemSetting()
     edge_drag_item_setting: EdgeItemSetting = EdgeItemSetting()
+
+
+T1 = T.TypeVar("T1")
+
+
+def dataclass_from_dict(klass: T.Type[T1], d) -> T1:
+    try:
+        fieldtypes = {f.name: f.type for f in fields(klass)}
+        return klass(**{
+            f: dataclass_from_dict(fieldtypes[f], d[f]) for f in d
+        })
+    except Exception:
+        return d  # Not a dataclass field
