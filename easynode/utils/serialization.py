@@ -38,8 +38,9 @@ def deserialize_port(
     setting = dataclass_from_dict(PortSetting, data["setting"])
     port: T.Union["Port", "DataPort"]
     if "data_type" in data:
+        data_type = eval(data["data_type"])
         port = DataPort(
-            data["name"], data["data_type"], data["data_range"],
+            data["name"], data_type, data["data_range"],
             data["data_default"], data["widget_args"], setting)
     else:
         port = Port(data["name"], setting)
