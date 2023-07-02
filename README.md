@@ -18,6 +18,7 @@ Easynode is a Python package offering a suite of components for building Node ed
 + [x] Node list for search and add widget.
 + [x] Undo/Redo.
 + [ ] Serialization / Deserialization.
+    * [ ] Save the state of the port widgets.
 + [x] Copy and paste.
 + [ ] Signals for hover, select, etc.
 + [ ] Node right click menu.
