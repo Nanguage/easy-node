@@ -42,6 +42,7 @@ def deserialize_port(
         port = DataPort(
             data["name"], data_type, data["data_range"],
             data["data_default"], data["widget_args"], setting)
+        port.widget_init_value = data["widget_value"]
     else:
         port = Port(data["name"], setting)
         port.type = data["type"]
@@ -83,10 +84,17 @@ def deserialize_node_with_factory(
         data: T.Dict[str, T.Any],
         editor: "NodeEditor",
         ) -> "Node":
+    from ..model.port import DataPort
     type_name = data['type_name']
     factory = editor.factory_table[type_name]
     node = factory.create_node()
     node.name = data['name']
+    for port in node.input_ports:
+        if isinstance(port, DataPort):
+            port_data = data['input_ports'][port.index]
+            assert isinstance(port_data, dict)
+            widget_value = port_data.get("widget_value")
+            port.widget_init_value = widget_value
     return node
 
 

@@ -96,6 +96,7 @@ class DataPort(Port):
         self.data_default = data_default
         self.widget_args = widget_args
         self.widget: T.Optional[PortWidget] = None
+        self.widget_init_value: T.Optional[T.Any] = None
 
     def blueprint_copy(self) -> "DataPort":
         return DataPort(
@@ -127,4 +128,6 @@ class DataPort(Port):
         else:
             self.data_default = None
             self.widget = TextPortWidget(self, kwargs)
+        if self.widget_init_value is not None:
+            self.widget.value = self.widget_init_value
         return self.widget
