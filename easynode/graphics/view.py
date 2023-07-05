@@ -19,6 +19,7 @@ if T.TYPE_CHECKING:
 
 class GraphicsView(QtWidgets.QGraphicsView):
     selected_node_items_moved = QtCore.Signal(QtCore.QPointF)
+    edge_drag_mode_changed = QtCore.Signal(bool)
 
     def __init__(
             self,
@@ -108,12 +109,14 @@ class GraphicsView(QtWidgets.QGraphicsView):
         paste_shortcut.activated.connect(self.paste_copied_items)
 
     def copy_selected_items(self):
+        """Copy selected items to clipboard."""
         app = QtWidgets.QApplication.instance()
         clipboard = app.clipboard()
         data = self.serialize_selected_items()
         clipboard.setText(data)
 
     def serialize_selected_items(self) -> str:
+        """Serialize selected items to json string."""
         from ..utils.serialization import serialize_subgraph  # type: ignore
         items = self.scene().selectedItems()
         nodes = []
@@ -127,6 +130,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         return data
 
     def paste_copied_items(self):
+        """Paste copied items from clipboard."""
         app = QtWidgets.QApplication.instance()
         clipboard = app.clipboard()
         data_str = clipboard.text()
@@ -238,15 +242,18 @@ class GraphicsView(QtWidgets.QGraphicsView):
         super().mousePressEvent(event)
 
     def show_node_list_widget(self, event: QtGui.QMouseEvent):
+        """Show the popup node list widget."""
         self.node_list_widget.update_list()
         pos = self.mapToScene(event.pos())
         self.node_list_widget_proxy.setPos(pos)
         self.node_list_widget_proxy.show()
 
     def hide_node_list_widget(self):
+        """Hide the popup node list widget."""
         self.node_list_widget_proxy.hide()
 
     def create_node_by_click(self, factory_type_name: str):
+        """Create a node by clicking the popup node list widget."""
         if factory_type_name == '':
             return
         if self._right_clicked_pos is not None:
@@ -256,6 +263,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
             self.hide_node_list_widget()
 
     def create_node(self, factory_type_name: str, pos: QtCore.QPointF):
+        """Create a node at the given position."""
         factory = self.scene().editor.factory_table.table[factory_type_name]
         node = factory.create_node()
         self.scene().graph.add_node(node)
@@ -302,6 +310,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         super().keyReleaseEvent(event)
 
     def remove_selected_items(self):
+        """Remove all selected items."""
         from ..command import RemoveItemsCommand  # type: ignore
         graph = self.scene().graph
         deleted_items = set()  # remove deleted items

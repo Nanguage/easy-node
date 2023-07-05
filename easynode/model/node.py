@@ -87,14 +87,14 @@ class Node(QtCore.QObject):
 
     @property
     def input_edges(self) -> T.List["Edge"]:
-        edges = []
+        edges: T.List["Edge"] = []
         for port in self.input_ports:
             edges.extend(port.edges)
         return edges
 
     @property
     def output_edges(self) -> T.List["Edge"]:
-        edges = []
+        edges: T.List["Edge"] = []
         for port in self.output_ports:
             edges.extend(port.edges)
         return edges

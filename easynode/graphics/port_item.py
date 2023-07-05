@@ -2,16 +2,12 @@ import typing as T
 from qtpy import QtWidgets, QtGui, QtCore
 
 from ..setting import PortItemSetting  # type: ignore
-from .edge_item import EdgeItem
 
 if T.TYPE_CHECKING:
     from ..model.port import Port  # type: ignore
 
 
 class PortItem(QtWidgets.QGraphicsItem):
-    edge_added = QtCore.Signal(EdgeItem)
-    edge_removed = QtCore.Signal(EdgeItem)
-
     def __init__(
             self,
             port: "Port",
