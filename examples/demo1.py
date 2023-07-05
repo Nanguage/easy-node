@@ -1,6 +1,6 @@
 from qtpy import QtWidgets
 from easynode import (
-    NodeEditor, NodeFactory, Edge,
+    NodeEditor, Edge, Node,
     Port, DataPort
 )
 
@@ -10,7 +10,7 @@ editor = NodeEditor()
 graph = editor.current_scene.graph
 
 
-class TestNode1(NodeFactory):
+class TestNode1(Node):
     input_ports = [
         Port(name="in1"),
         Port(name="in2")
@@ -20,7 +20,9 @@ class TestNode1(NodeFactory):
     ]
 
 
-class TestNode2(NodeFactory):
+class TestNode2(Node):
+    theme_color = "#ff0000"
+
     input_ports = [
         DataPort(name="in1", data_type=int, data_range=(0, 100)),
         DataPort(name="in2", data_type=float, data_default=2.0),
@@ -34,9 +36,9 @@ class TestNode2(NodeFactory):
 editor.factory_table.register(TestNode1)
 editor.factory_table.register(TestNode2)
 
-n1 = TestNode1.create_node()
-n2 = TestNode1.create_node()
-n3 = TestNode2.create_node()
+n1 = TestNode1()
+n2 = TestNode1()
+n3 = TestNode2()
 e1 = Edge(n1.output_ports[0], n3.input_ports[0])
 e2 = Edge(n2.output_ports[0], n3.input_ports[1])
 

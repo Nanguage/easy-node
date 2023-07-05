@@ -58,7 +58,7 @@ def serialize_node(node: "Node") -> T.Dict[str, T.Any]:
         setting = asdict(node.item_setting)
     return {
         "id": id(node),
-        "type_name": node.type_name,
+        "type_name": node.type_name(),
         "name": node.name,
         "input_ports": [serialize_port(p) for p in node.input_ports],
         "output_ports": [serialize_port(p) for p in node.output_ports],
@@ -87,7 +87,7 @@ def deserialize_node_with_factory(
     from ..model.port import DataPort
     type_name = data['type_name']
     factory = editor.factory_table[type_name]
-    node = factory.create_node()
+    node = factory()
     node.name = data['name']
     for port in node.input_ports:
         if isinstance(port, DataPort):

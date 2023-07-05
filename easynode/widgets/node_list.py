@@ -8,7 +8,8 @@ import textdistance
 from ..setting import NodeListWidgetSetting
 
 if T.TYPE_CHECKING:
-    from easynode.node_factory import NodeFactoryTable, NodeFactory
+    from ..node_factory import NodeFactoryTable
+    from ..model.node import Node
 
 
 @lru_cache(maxsize=None)
@@ -84,7 +85,7 @@ class NodeList(QtWidgets.QWidget):
 
     def _get_ordered_node_factories(
             self, thresh_ratio: float = 0.5
-            ) -> T.List[T.Type["NodeFactory"]]:
+            ) -> T.List[T.Type["Node"]]:
         search_text = self.search_line_edit.text()
         if search_text == "":
             return sorted(

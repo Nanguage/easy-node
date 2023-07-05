@@ -40,7 +40,7 @@ class NodeEditor(QtWidgets.QWidget):
         factory = self.factory_table.table.get(type_name)
         if factory is None:
             raise ValueError(f"Node type {type_name} not found")
-        node = factory.create_node()
+        node = factory()
         self.current_scene.graph.add_node(node)
         return node
 

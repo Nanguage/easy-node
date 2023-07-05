@@ -265,7 +265,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def create_node(self, factory_type_name: str, pos: QtCore.QPointF):
         """Create a node at the given position."""
         factory = self.scene().editor.factory_table.table[factory_type_name]
-        node = factory.create_node()
+        node = factory()
         self.scene().graph.add_node(node)
         assert node.item is not None
         node.item.content_widget.setFocus()

@@ -16,39 +16,49 @@ class Node(QtCore.QObject):
     selected_changed = QtCore.Signal(bool)
     position_changed = QtCore.Signal(QtCore.QPointF)
 
+    _instance_count = 0
+    input_ports: T.List[Port] = []
+    output_ports: T.List[Port] = []
+    theme_color: str = "#ffffff"
+
     def __init__(
             self,
-            name: str,
-            type_name: T.Optional[str] = None,
-            input_ports: T.Optional[T.List[Port]] = None,
-            output_ports: T.Optional[T.List[Port]] = None,
-            widget: T.Optional["QWidget"] = None,
+            name: T.Optional[str] = None,
             item_setting: T.Optional[NodeItemSetting] = None,
             **attrs
             ) -> None:
         super().__init__()
         self.status = "normal"
-        if type_name is None:
-            type_name = self.__class__.__name__
-        self.type_name = type_name
+        if name is None:
+            name = str(self._instance_count)
         self.name = name
-        self.init_ports(input_ports, output_ports)
-        self.widget: T.Optional["QWidget"] = widget
+        self.__class__._instance_count += 1
+        self._init_ports()
+        self.widget: T.Optional["QWidget"] = self.create_widget()
         self.item: T.Optional["NodeItem"] = None
         self.graph: T.Optional["GraphicsScene"] = None
+        if item_setting is None:
+            item_setting = NodeItemSetting()
+            item_setting.title_color = self.theme_color
         self.item_setting = item_setting
         self.attrs = attrs
         self.position_changed.connect(self._on_position_changed)
 
-    def init_ports(
-            self,
-            input_ports: T.Optional[T.List[Port]] = None,
-            output_ports: T.Optional[T.List[Port]] = None
-            ):
-        if input_ports is None:
-            input_ports = []
-        if output_ports is None:
-            output_ports = []
+    @classmethod
+    def type_name(cls) -> str:
+        return cls.__name__
+
+    def create_widget(self) -> T.Optional["QWidget"]:
+        return None
+
+    def _init_ports(self):
+        cls = self.__class__
+        input_ports = [
+            port.blueprint_copy() for port in cls.input_ports
+        ]
+        output_ports = [
+            port.blueprint_copy() for port in cls.output_ports
+        ]
         self.input_ports = input_ports
         self.output_ports = output_ports
         for tp, ports in zip(("in", "out"), (input_ports, output_ports)):
@@ -66,7 +76,7 @@ class Node(QtCore.QObject):
 
     @property
     def title(self) -> str:
-        return self.type_name + ": " + self.name
+        return self.type_name() + ": " + self.name
 
     def __repr__(self) -> str:
         cls_name = self.__class__.__name__
