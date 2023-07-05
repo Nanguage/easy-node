@@ -7,7 +7,6 @@ from ..graphics.node_item import NodeItem
 from ..setting import NodeItemSetting
 
 if T.TYPE_CHECKING:
-    from ..graphics.scene import GraphicsScene
     from qtpy.QtWidgets import QWidget
     from .edge import Edge
 
@@ -36,7 +35,6 @@ class Node(QtCore.QObject):
         self._init_ports()
         self.widget: T.Optional["QWidget"] = self.create_widget()
         self.item: T.Optional["NodeItem"] = None
-        self.graph: T.Optional["GraphicsScene"] = None
         if item_setting is None:
             item_setting = NodeItemSetting()
             item_setting.title_color = self.theme_color
@@ -50,6 +48,15 @@ class Node(QtCore.QObject):
 
     def create_widget(self) -> T.Optional["QWidget"]:
         return None
+
+    def create_edge(
+            self, other: "Node",
+            source_port_idx: int, target_port_idx: int) -> "Edge":
+        from .edge import Edge
+        source_port = self.output_ports[source_port_idx]
+        target_port = other.input_ports[target_port_idx]
+        e = Edge(source_port, target_port)
+        return e
 
     def _init_ports(self):
         cls = self.__class__

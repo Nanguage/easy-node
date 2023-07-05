@@ -41,7 +41,6 @@ class NodeEditor(QtWidgets.QWidget):
         if factory is None:
             raise ValueError(f"Node type {type_name} not found")
         node = factory()
-        self.current_scene.graph.add_node(node)
         return node
 
     def init_layout(self):
