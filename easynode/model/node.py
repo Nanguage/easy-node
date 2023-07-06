@@ -40,6 +40,7 @@ class Node(QtCore.QObject):
         self.item_setting.title_color = self.theme_color
         self.attrs = attrs
         self.position_changed.connect(self._on_position_changed)
+        self._title = self.type_name() + ": " + self.name
 
     @classmethod
     def type_name(cls) -> str:
@@ -82,7 +83,13 @@ class Node(QtCore.QObject):
 
     @property
     def title(self) -> str:
-        return self.type_name() + ": " + self.name
+        return self._title
+
+    @title.setter
+    def title(self, value: str):
+        self._title = value
+        if self.item is not None:
+            self.item.update()
 
     def __repr__(self) -> str:
         cls_name = self.__class__.__name__
