@@ -39,14 +39,13 @@ class TestNode3(Node):
         return QtWidgets.QTextEdit()
 
 
-editor.factory_table.register(TestNode)
-editor.factory_table.register(TestNode2)
-editor.factory_table.register(TestNode3)
+editor.factory_table.register(TestNode, TestNode2, TestNode3)
 n1 = editor.create_node("TestNode")
 n2 = editor.create_node("TestNode2")
 n3 = editor.create_node("TestNode")
 n4 = editor.create_node("TestNode2")
 n5 = editor.create_node("TestNode3")
+graph.add_nodes(n1, n2, n3, n4, n5)
 graph.add_edge(Edge(n1.output_ports[0], n2.input_ports[0]))
 graph.add_edge(Edge(n3.output_ports[0], n5.input_ports[0]))
 graph.add_edge(Edge(n5.output_ports[0], n4.input_ports[0]))
