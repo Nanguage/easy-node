@@ -3,7 +3,7 @@ from dataclasses import asdict
 
 if T.TYPE_CHECKING:
     from ..node_editor import NodeEditor
-    from ..model.port import Port, DataPort
+    from ..model.port import Port
     from ..model.node import Node
     from ..model.edge import Edge
     from ..model.graph import SubGraph, Graph
@@ -28,25 +28,6 @@ def serialize_port(port: "Port") -> T.Dict[str, T.Any]:
             "widget_value": widget_value,
         })
     return data
-
-
-def deserialize_port(
-        data: T.Dict[str, T.Any],
-        ) -> T.Union["Port", "DataPort"]:
-    from ..model.port import Port, DataPort
-    from ..setting import PortSetting, dataclass_from_dict
-    setting = dataclass_from_dict(PortSetting, data["setting"])
-    port: T.Union["Port", "DataPort"]
-    if "data_type" in data:
-        data_type = eval(data["data_type"])
-        port = DataPort(
-            data["name"], data_type, data["data_range"],
-            data["data_default"], data["widget_args"], setting)
-        port.widget_init_value = data["widget_value"]
-    else:
-        port = Port(data["name"], setting)
-        port.type = data["type"]
-    return port
 
 
 def serialize_node(node: "Node") -> T.Dict[str, T.Any]:
@@ -75,7 +56,7 @@ def deserialize_node(
     if type_name in editor.factory_table:
         node = deserialize_node_with_factory(data, editor)
     else:
-        node = deserialize_node_with_data(data)
+        raise ValueError(f"Unknown node type: {type_name}")
     node.attrs = data['attrs']
     return node
 
@@ -96,37 +77,6 @@ def deserialize_node_with_factory(
             widget_value = port_data.get("widget_value")
             port.widget_init_value = widget_value
     return node
-
-
-def deserialize_node_with_data(
-        data: T.Dict[str, T.Any],
-        ) -> "Node":
-    from ..setting import NodeItemSetting, dataclass_from_dict
-    from ..model.node import Node
-    setting = None
-    if data['setting'] is not None:
-        setting = dataclass_from_dict(NodeItemSetting, data['setting'])
-    input_ports = _deserialize_ports(data['input_ports'])
-    output_ports = _deserialize_ports(data['output_ports'])
-    node = Node(
-        data['name'],
-        type_name=data['type_name'],
-        input_ports=input_ports,
-        output_ports=output_ports,
-        setting=setting,
-    )
-    return node
-
-
-def _deserialize_ports(
-        data: T.List[T.Dict[str, T.Any]],
-        ) -> T.List[T.Union["Port", "DataPort"]]:
-    ports = []
-    port: T.Union[Port, DataPort]
-    for port_data in data:
-        port = deserialize_port(port_data)
-        ports.append(port)
-    return ports
 
 
 def serialize_edge(edge: "Edge") -> T.Dict[str, T.Any]:

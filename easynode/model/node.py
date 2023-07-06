@@ -1,4 +1,5 @@
 import typing as T
+from copy import copy
 
 from qtpy import QtCore
 
@@ -18,12 +19,12 @@ class Node(QtCore.QObject):
     _instance_count = 0
     input_ports: T.List[Port] = []
     output_ports: T.List[Port] = []
+    item_setting: NodeItemSetting = NodeItemSetting()
     theme_color: str = "#ffffff"
 
     def __init__(
             self,
             name: T.Optional[str] = None,
-            item_setting: T.Optional[NodeItemSetting] = None,
             **attrs
             ) -> None:
         super().__init__()
@@ -35,10 +36,8 @@ class Node(QtCore.QObject):
         self._init_ports()
         self.widget: T.Optional["QWidget"] = self.create_widget()
         self.item: T.Optional["NodeItem"] = None
-        if item_setting is None:
-            item_setting = NodeItemSetting()
-            item_setting.title_color = self.theme_color
-        self.item_setting = item_setting
+        self.item_setting = copy(self.item_setting)
+        self.item_setting.title_color = self.theme_color
         self.attrs = attrs
         self.position_changed.connect(self._on_position_changed)
 

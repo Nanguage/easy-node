@@ -8,8 +8,9 @@ class NodeFactoryTable(object):
     def __init__(self) -> None:
         self.table: T.Dict[str, T.Type[Node]] = {}
 
-    def register(self, factory: T.Type[Node]) -> None:
-        self.table[factory.type_name()] = factory
+    def register(self, *factories: T.Type[Node]) -> None:
+        for factory in factories:
+            self.table[factory.type_name()] = factory
 
     def create_node_list_widget(self) -> NodeList:
         return NodeList(node_factory_table=self)
