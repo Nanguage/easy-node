@@ -12,6 +12,50 @@ if T.TYPE_CHECKING:
     from .view import GraphicsView
 
 
+class NodeTitleItem(QtWidgets.QGraphicsTextItem):
+    def __init__(self, parent: "NodeItem"):
+        super().__init__(parent=parent)
+        self.node_item = node_item = parent
+        setting = node_item.setting
+        title_color = QtGui.QColor(setting.title_color)
+        title_font = QtGui.QFont(
+            setting.title_font_family,
+            setting.title_font_size)
+        self.setDefaultTextColor(title_color)
+        self.setFont(title_font)
+        self.setPlainText(node_item.node.title)
+        padding = setting.title_padding
+        self.setPos(padding, 0)
+        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)  # type: ignore
+        self._edit_mode = False
+
+    def start_edit(self):
+        if self._edit_mode:
+            return
+        self._edit_mode = True
+        self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)  # type: ignore
+        self.setFocus()
+
+    def finish_edit(self):
+        self._edit_mode = False
+        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)  # type: ignore
+        cursor = self.textCursor()
+        cursor.clearSelection()
+        self.setTextCursor(cursor)
+        self.clearFocus()
+        self.node_item.node.title = self.toPlainText()
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Return:  # type: ignore
+            self.finish_edit()
+        else:
+            super().keyPressEvent(event)
+
+    def focusOutEvent(self, event):
+        self.finish_edit()
+        super().focusOutEvent(event)
+
+
 class MovementState(Enum):
     mouse_pressed = 0
     mouse_released = 1
@@ -97,17 +141,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self._init_title()
 
     def _init_title(self):
-        setting = self.setting
-        title_color = QtGui.QColor(setting.title_color)
-        title_font = QtGui.QFont(
-            setting.title_font_family,
-            setting.title_font_size)
-        self.title = QtWidgets.QGraphicsTextItem(self)
-        self.title.setDefaultTextColor(title_color)
-        self.title.setFont(title_font)
-        self.title.setPlainText(self.node.title)
-        padding = setting.title_padding
-        self.title.setPos(padding, 0)
+        self.title = NodeTitleItem(self)
 
     def _init_content(self):
         self.content_widget = widget = QtWidgets.QWidget()
