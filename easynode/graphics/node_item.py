@@ -23,37 +23,10 @@ class NodeTitleItem(QtWidgets.QGraphicsTextItem):
             setting.title_font_size)
         self.setDefaultTextColor(title_color)
         self.setFont(title_font)
-        self.setPlainText(node_item.node.title)
+        self.setPlainText(node_item.node.name)
         padding = setting.title_padding
         self.setPos(padding, 0)
-        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)  # type: ignore
         self._edit_mode = False
-
-    def start_edit(self):
-        if self._edit_mode:
-            return
-        self._edit_mode = True
-        self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)  # type: ignore
-        self.setFocus()
-
-    def finish_edit(self):
-        self._edit_mode = False
-        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)  # type: ignore
-        cursor = self.textCursor()
-        cursor.clearSelection()
-        self.setTextCursor(cursor)
-        self.clearFocus()
-        self.node_item.node.title = self.toPlainText()
-
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Return:  # type: ignore
-            self.finish_edit()
-        else:
-            super().keyPressEvent(event)
-
-    def focusOutEvent(self, event):
-        self.finish_edit()
-        super().focusOutEvent(event)
 
 
 class MovementState(Enum):
@@ -83,6 +56,10 @@ class NodeItem(QtWidgets.QGraphicsItem):
     @property
     def view(self) -> "GraphicsView":
         return self.scene().views()[0]
+
+    def show_node_menu(self, pos: QtCore.QPoint):
+        menu = self.node.create_menu()
+        menu.exec_(pos)
 
     def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         child_item = self.get_item_at(event.scenePos())

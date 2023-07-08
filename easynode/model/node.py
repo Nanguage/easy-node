@@ -1,7 +1,7 @@
 import typing as T
 from copy import copy
 
-from qtpy import QtCore
+from qtpy import QtCore, QtWidgets
 
 from .port import Port
 from ..graphics.node_item import NodeItem
@@ -22,6 +22,11 @@ class Node(QtCore.QObject):
     item_setting: NodeItemSetting = NodeItemSetting()
     theme_color: str = "#ffffff"
 
+    menu_actions_basic: T.Dict[str, T.Callable[["Node"], None]] = {
+        "Edit name": lambda self: self.on_edit_name(),
+    }
+    menu_actions: T.Dict[str, T.Callable[["Node"], None]] = {}
+
     def __init__(
             self,
             name: T.Optional[str] = None,
@@ -30,8 +35,8 @@ class Node(QtCore.QObject):
         super().__init__()
         self.status = "normal"
         if name is None:
-            name = str(self._instance_count)
-        self.name = name
+            name = self.type_name() + ": " + str(self._instance_count)
+        self._name = name
         self.__class__._instance_count += 1
         self._init_ports()
         self.widget: T.Optional["QWidget"] = self.create_widget()
@@ -40,7 +45,6 @@ class Node(QtCore.QObject):
         self.item_setting.title_color = self.theme_color
         self.attrs = attrs
         self.position_changed.connect(self._on_position_changed)
-        self._title = self.type_name() + ": " + self.name
 
     @classmethod
     def type_name(cls) -> str:
@@ -82,18 +86,18 @@ class Node(QtCore.QObject):
         return id(self)
 
     @property
-    def title(self) -> str:
-        return self._title
+    def name(self) -> str:
+        return self._name
 
-    @title.setter
-    def title(self, value: str):
-        self._title = value
+    @name.setter
+    def name(self, value: str):
+        self._name = value
         if self.item is not None:
             self.item.update()
 
     def __repr__(self) -> str:
         cls_name = self.__class__.__name__
-        return f"{cls_name}({self.title})"
+        return f"{cls_name}({self.name})"
 
     def create_item(
             self,
@@ -121,3 +125,24 @@ class Node(QtCore.QObject):
         for port in self.output_ports:
             edges.extend(port.edges)
         return edges
+
+    def on_edit_name(self):
+        dialog = QtWidgets.QInputDialog()
+        dialog.setWindowTitle("Edit name")
+        dialog.setLabelText("Name:")
+        dialog.setTextValue(self.name)
+        dialog.setOkButtonText("Ok")
+        dialog.setCancelButtonText("Cancel")
+        dialog.setWindowModality(QtCore.Qt.WindowModal)
+        if dialog.exec_():
+            self.name = dialog.textValue()
+            self.item.title.setPlainText(self.name)
+
+    def create_menu(self) -> "QtWidgets.QMenu":
+        menu = QtWidgets.QMenu()
+        items = list(self.menu_actions_basic.items())
+        items.extend(self.menu_actions.items())
+        for action_name, action_func in items:
+            action = menu.addAction(action_name)
+            action.triggered.connect(lambda: action_func(self))
+        return menu

@@ -1,3 +1,9 @@
+from qtpy import QtCore
+
+
+def point2pointf(point: QtCore.QPoint) -> QtCore.QPointF:
+    return QtCore.QPointF(point.x(), point.y())
+
 
 def hex_color_add_alpha(hex: str, alpha: int) -> str:
     """Add alpha to hex color.

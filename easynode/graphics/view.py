@@ -7,6 +7,7 @@ from .edge_item import EdgeDragItem
 from .edge_item import EdgeItem
 from .node_item import NodeItem
 from ..utils.serialization import deserialize_subgraph
+from ..utils.misc import point2pointf
 
 try:
     from qtpy.QtWidgets import QUndoStack
@@ -236,15 +237,23 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def _right_mouse_button_press(self, event: QtGui.QMouseEvent):
         item = self.itemAt(event.pos())
+        pos = self.mapToScene(event.pos())
         if item is None:
-            self._right_clicked_pos = event.pos()
-            self.show_node_list_widget(event)
+            self._right_clicked_pos = pos
+            self.show_node_list_widget(pos)
+        else:
+            if isinstance(item, NodeItem):
+                item.show_node_menu(event.globalPos())
+            elif isinstance(item, QtWidgets.QGraphicsProxyWidget):
+                if isinstance(item.parentItem(), NodeItem):
+                    pitem = item.parentItem()
+                    assert isinstance(pitem, NodeItem)
+                    pitem.show_node_menu(event.globalPos())
         super().mousePressEvent(event)
 
-    def show_node_list_widget(self, event: QtGui.QMouseEvent):
+    def show_node_list_widget(self, pos: QtCore.QPointF):
         """Show the popup node list widget."""
         self.node_list_widget.update_list()
-        pos = self.mapToScene(event.pos())
         self.node_list_widget_proxy.setPos(pos)
         self.node_list_widget_proxy.show()
 
@@ -259,7 +268,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
         if self._right_clicked_pos is not None:
             self.create_node(
                 factory_type_name,
-                self.mapToScene(self._right_clicked_pos))
+                self._right_clicked_pos)
             self.hide_node_list_widget()
 
     def create_node(self, factory_type_name: str, pos: QtCore.QPointF):
@@ -279,12 +288,14 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def _middle_mouse_button_press(self, event: QtGui.QMouseEvent):
         fake_release_midele = QtGui.QMouseEvent(
             QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
-            event.screenPos(), QtCore.Qt.MiddleButton,  # type: ignore
+            point2pointf(event.globalPos()),
+            QtCore.Qt.MiddleButton,  # type: ignore
             QtCore.Qt.NoButton, event.modifiers())  # type: ignore
         super().mouseReleaseEvent(fake_release_midele)
         self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
         fake_press_left = QtGui.QMouseEvent(
-            event.type(), event.localPos(), event.screenPos(),
+            event.type(), event.localPos(),
+            point2pointf(event.globalPos()),
             QtCore.Qt.LeftButton, QtCore.Qt.NoButton,  # type: ignore
             event.modifiers())
         super().mousePressEvent(fake_press_left)
@@ -292,7 +303,8 @@ class GraphicsView(QtWidgets.QGraphicsView):
     def _middle_mouse_button_release(self, event: QtGui.QMouseEvent):
         fake_release_left = QtGui.QMouseEvent(
             QtCore.QEvent.MouseButtonRelease, event.localPos(),  # type: ignore
-            event.screenPos(), QtCore.Qt.LeftButton,  # type: ignore
+            point2pointf(event.globalPos()),
+            QtCore.Qt.LeftButton,  # type: ignore
             QtCore.Qt.NoButton, event.modifiers())  # type: ignore
         super().mouseReleaseEvent(fake_release_left)
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
