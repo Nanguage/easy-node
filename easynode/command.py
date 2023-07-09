@@ -141,3 +141,26 @@ class PasteSubgraphCommand(FlowCommand):
             self.scene.graph.add_node(node)
         for edge in self.edges:
             self.scene.graph.add_edge(edge)
+
+
+class NodeRenameCommand(FlowCommand):
+    def __init__(
+            self, view: "GraphicsView",
+            node: "Node",
+            old_name: str,
+            new_name: str,
+            ):
+        super().__init__(view)
+        self.node = node
+        self.old_name = old_name
+        self.new_name = new_name
+
+    def _undo(self):
+        self.node.name = self.old_name
+        if self.node.item:
+            self.node.item.title.update_text()
+
+    def _redo(self):
+        self.node.name = self.new_name
+        if self.node.item:
+            self.node.item.title.update_text()

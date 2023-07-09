@@ -21,7 +21,7 @@ Easynode is a Python package offering a suite of components for building Node ed
     * [x] Save the state of the port widgets.
 + [x] Copy and paste.
 + [x] Signals for hover, select, etc.
-+ [ ] Node right click menu.
++ [x] Node right click menu.
 + [ ] Node and port documentation.
 + [ ] Menu.
 + [ ] Allow change config at runtime with UI.
@@ -33,8 +33,10 @@ Easynode is a Python package offering a suite of components for building Node ed
 | --- | --- | --- |
 | Node | `.selected_changed` | Emitted when the node is selected or unselected. |
 | Node | `.position_changed` | Emitted when the node position is changed. |
+| Node | `renamed` | Emitted when the node is renamed. |
 | Port | `.edge_added` | Emitted when an edge is added to the port. |
 | Port | `.edge_removed` | Emitted when an edge is removed from the port. |
 | Edge | `.selected_changed` | Emitted when the edge is selected or unselected. |
+| Graph | `elements_changed` | Emitted when the graph elements(nodes and edges) is changed. |
 | GraphicsView | `.selected_node_items_moved` | Emitted when the selected nodes are moved. |
 | GraphicsView | `.edge_drag_mode_changed` | Emitted when the edge drag mode is changed. |

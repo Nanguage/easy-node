@@ -15,11 +15,14 @@ if T.TYPE_CHECKING:
     from ..node_editor import NodeEditor
 
 
-class Graph:
+class Graph(QtCore.QObject):
+    elements_changed = QtCore.Signal()
+
     def __init__(
             self,
             scene: T.Optional["GraphicsScene"] = None,
             ) -> None:
+        super().__init__()
         self.nodes: T.List[Node] = []
         self.edges: T.List[Edge] = []
         self.scene: T.Optional["GraphicsScene"] = scene
@@ -33,6 +36,7 @@ class Graph:
                 node.create_item(setting)
             assert node.item is not None
             self.scene.addItem(node.item)
+        self.elements_changed.emit()  # type: ignore
 
     def add_nodes(self, *nodes: Node):
         for node in nodes:
@@ -47,6 +51,7 @@ class Graph:
             self.scene.removeItem(node.item)
         for edge in node.input_edges + node.output_edges:
             self.remove_edge(edge)
+        self.elements_changed.emit()  # type: ignore
 
     def add_edge(self, edge: Edge):
         if edge in self.edges:
@@ -61,6 +66,7 @@ class Graph:
                 edge.create_item(setting)
             assert edge.item is not None
             self.scene.addItem(edge.item)
+        self.elements_changed.emit()  # type: ignore
 
     def add_edges(self, *edges: Edge):
         for edge in edges:
@@ -75,6 +81,7 @@ class Graph:
         if self.scene:
             assert edge.item is not None
             self.scene.removeItem(edge.item)
+        self.elements_changed.emit()  # type: ignore
 
     def create_items(self):
         if self.scene:

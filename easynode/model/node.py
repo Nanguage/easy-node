@@ -16,6 +16,7 @@ if T.TYPE_CHECKING:
 class Node(QtCore.QObject):
     selected_changed = QtCore.Signal(bool)
     position_changed = QtCore.Signal(QtCore.QPointF)
+    renamed = QtCore.Signal(str)
 
     _instance_count = 0
     input_ports: T.List[Port] = []
@@ -94,8 +95,7 @@ class Node(QtCore.QObject):
     @name.setter
     def name(self, value: str):
         self._name = value
-        if self.item is not None:
-            self.item.update()
+        self.renamed.emit(value)
 
     def __repr__(self) -> str:
         cls_name = self.__class__.__name__
@@ -137,8 +137,16 @@ class Node(QtCore.QObject):
         dialog.setCancelButtonText("Cancel")
         dialog.setWindowModality(QtCore.Qt.WindowModal)
         if dialog.exec_():
-            self.name = dialog.textValue()
-            self.item.title.setPlainText(self.name)
+            new_name = dialog.textValue()
+            old_name = self.name
+            self.name = new_name
+            self.item.title.update_text()
+            assert self.item is not None
+            from ..command import NodeRenameCommand
+            view = self.item.view
+            view.undo_stack.push(
+                NodeRenameCommand(view, self, old_name, new_name)
+            )
 
     def on_delete(self):
         assert self.item is not None

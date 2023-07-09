@@ -28,6 +28,9 @@ class NodeTitleItem(QtWidgets.QGraphicsTextItem):
         self.setPos(padding, 0)
         self._edit_mode = False
 
+    def update_text(self):
+        self.setPlainText(self.node_item.node.name)
+
 
 class MovementState(Enum):
     mouse_pressed = 0
