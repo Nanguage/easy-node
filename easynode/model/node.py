@@ -1,5 +1,6 @@
 import typing as T
 from copy import copy
+from collections import OrderedDict
 
 from qtpy import QtCore, QtWidgets
 
@@ -24,6 +25,7 @@ class Node(QtCore.QObject):
 
     menu_actions_basic: T.Dict[str, T.Callable[["Node"], None]] = {
         "Edit name": lambda self: self.on_edit_name(),
+        "Delete": lambda self: self.on_delete(),
     }
     menu_actions: T.Dict[str, T.Callable[["Node"], None]] = {}
 
@@ -138,11 +140,22 @@ class Node(QtCore.QObject):
             self.name = dialog.textValue()
             self.item.title.setPlainText(self.name)
 
+    def on_delete(self):
+        assert self.item is not None
+        view = self.item.view
+        view.scene().clearSelection()
+        self.item.setSelected(True)
+        view.remove_selected_items()
+
     def create_menu(self) -> "QtWidgets.QMenu":
         menu = QtWidgets.QMenu()
-        items = list(self.menu_actions_basic.items())
-        items.extend(self.menu_actions.items())
-        for action_name, action_func in items:
+        items = OrderedDict()
+        items.update(self.menu_actions_basic)
+        items.update(self.menu_actions)
+        for action_name in items.keys():
             action = menu.addAction(action_name)
-            action.triggered.connect(lambda: action_func(self))
+
+            def action_func(*args, name = action_name):
+                items[name](self)
+            action.triggered.connect(action_func)  # type: ignore
         return menu
