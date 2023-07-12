@@ -163,7 +163,7 @@ class Node(QtCore.QObject):
         for action_name in items.keys():
             action = menu.addAction(action_name)
 
-            def action_func(*args, name = action_name):
+            def action_func(*args, name=action_name):
                 items[name](self)
             action.triggered.connect(action_func)  # type: ignore
         return menu

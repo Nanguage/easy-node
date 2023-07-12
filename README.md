@@ -40,3 +40,6 @@ Easynode is a Python package offering a suite of components for building Node ed
 | Graph | `elements_changed` | Emitted when the graph elements(nodes and edges) is changed. |
 | GraphicsView | `.selected_node_items_moved` | Emitted when the selected nodes are moved. |
 | GraphicsView | `.edge_drag_mode_changed` | Emitted when the edge drag mode is changed. |
+| NodeEditor | `.scene_added` | Emitted when a scene is added to the node editor. |
+| NodeEditor | `.scene_removed` | Emitted when a scene is removed from the node editor. |
+| NodeEditor | `.view_changed` | Emitted when the view is changed. |

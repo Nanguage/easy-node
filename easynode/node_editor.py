@@ -1,6 +1,6 @@
 import typing as T
 
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from .graphics.scene import GraphicsScene
 from .graphics.view import GraphicsView
@@ -12,6 +12,10 @@ from .model.graph import Graph
 
 
 class NodeEditor(QtWidgets.QWidget):
+    scene_added = QtCore.Signal(GraphicsScene)
+    scene_removed = QtCore.Signal(GraphicsScene)
+    view_changed = QtCore.Signal(GraphicsView)
+
     def __init__(
             self,
             parent: T.Optional[QtWidgets.QWidget] = None,
@@ -28,6 +32,15 @@ class NodeEditor(QtWidgets.QWidget):
         self.current_view: T.Optional[GraphicsView] = None
         self.init_layout()
         self.load_style_sheet(style_sheet)
+        self.tabs.currentChanged.connect(self._on_tab_changed)
+
+    def _on_tab_changed(self, index: int):
+        index -= 1
+        if index == -1:
+            self.current_view = None
+        else:
+            self.current_view = self.views[index]
+        self.view_changed.emit(self.current_view)
 
     @property
     def current_scene(self) -> GraphicsScene:
@@ -67,6 +80,7 @@ class NodeEditor(QtWidgets.QWidget):
         scene = GraphicsScene(self)
         view = GraphicsView(scene, self)
         self.scenes.append(scene)
+        self.scene_added.emit(scene)
         self.views.append(view)
         new_tab_name = self._get_new_tab_name()
         new_tab_idx = self.tabs.addTab(view, new_tab_name)
@@ -76,7 +90,9 @@ class NodeEditor(QtWidgets.QWidget):
     def delete_tab(self, index: int):
         self.tabs.removeTab(index)
         view = self.views.pop(index-1)
-        self.scenes.remove(view.scene())
+        scene = view.scene()
+        self.scene_removed.emit(scene)
+        self.scenes.remove(scene)
         # set current view
         if len(self.views) == 0:
             self.current_view = None
