@@ -17,6 +17,10 @@ if T.TYPE_CHECKING:
 
 class Graph(QtCore.QObject):
     elements_changed = QtCore.Signal()
+    node_added = QtCore.Signal(Node)
+    node_removed = QtCore.Signal(Node)
+    edge_added = QtCore.Signal(Edge)
+    edge_removed = QtCore.Signal(Edge)
 
     def __init__(
             self,
@@ -36,6 +40,7 @@ class Graph(QtCore.QObject):
                 node.create_item(setting)
             assert node.item is not None
             self.scene.addItem(node.item)
+        self.node_added.emit(node)
         self.elements_changed.emit()  # type: ignore
 
     def add_nodes(self, *nodes: Node):
@@ -51,6 +56,7 @@ class Graph(QtCore.QObject):
             self.scene.removeItem(node.item)
         for edge in node.input_edges + node.output_edges:
             self.remove_edge(edge)
+        self.node_removed.emit(node)
         self.elements_changed.emit()  # type: ignore
 
     def add_edge(self, edge: Edge):
@@ -66,6 +72,7 @@ class Graph(QtCore.QObject):
                 edge.create_item(setting)
             assert edge.item is not None
             self.scene.addItem(edge.item)
+        self.edge_added.emit(edge)
         self.elements_changed.emit()  # type: ignore
 
     def add_edges(self, *edges: Edge):
@@ -81,6 +88,7 @@ class Graph(QtCore.QObject):
         if self.scene:
             assert edge.item is not None
             self.scene.removeItem(edge.item)
+        self.edge_removed.emit(edge)
         self.elements_changed.emit()  # type: ignore
 
     def create_items(self):

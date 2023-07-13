@@ -29,17 +29,21 @@ Easynode is a Python package offering a suite of components for building Node ed
 
 ## Signals
 
-| Item | Signal | Description |
-| --- | --- | --- |
-| Node | `.selected_changed` | Emitted when the node is selected or unselected. |
-| Node | `.position_changed` | Emitted when the node position is changed. |
-| Node | `renamed` | Emitted when the node is renamed. |
-| Port | `.edge_added` | Emitted when an edge is added to the port. |
-| Port | `.edge_removed` | Emitted when an edge is removed from the port. |
-| Edge | `.selected_changed` | Emitted when the edge is selected or unselected. |
-| Graph | `elements_changed` | Emitted when the graph elements(nodes and edges) is changed. |
-| GraphicsView | `.selected_node_items_moved` | Emitted when the selected nodes are moved. |
-| GraphicsView | `.edge_drag_mode_changed` | Emitted when the edge drag mode is changed. |
-| NodeEditor | `.scene_added` | Emitted when a scene is added to the node editor. |
-| NodeEditor | `.scene_removed` | Emitted when a scene is removed from the node editor. |
-| NodeEditor | `.view_changed` | Emitted when the view is changed. |
+| Item | Signal | Value type | Description |
+| --- | --- | --- | --- |
+| Node | `.selected_changed` | `bool` | Emitted when the node is selected or unselected. |
+| Node | `.position_changed` | `QtCore.QPointF` | Emitted when the node position is changed. |
+| Node | `renamed` | `str` | Emitted when the node is renamed. |
+| Port | `.edge_added` | `Edge` | Emitted when an edge is added to the port. |
+| Port | `.edge_removed` | `Edge` | Emitted when an edge is removed from the port. |
+| Edge | `.selected_changed` | `bool` | Emitted when the edge is selected or unselected. |
+| Graph | `.elements_changed` | `None` | Emitted when the graph elements(nodes and edges) is changed. |
+| Graph | `.node_added` | `Node` | Emitted when a node is added to the graph. |
+| Graph | `.node_removed` | `Node` | Emitted when a node is removed from the graph. |
+| Graph | `.edge_added` | `Edge` | Emitted when an edge is added to the graph. |
+| Graph | `.edge_removed` | `Edge` | Emitted when an edge is removed from the graph. |
+| GraphicsView | `.selected_node_items_moved` | `QtCore.QPointF` | Emitted when the selected nodes are moved. |
+| GraphicsView | `.edge_drag_mode_changed` | `bool` | Emitted when the edge drag mode is changed. |
+| NodeEditor | `.scene_added` | `GraphicsScene` | Emitted when a scene is added to the node editor. |
+| NodeEditor | `.scene_removed` | `GraphicsScene` | Emitted when a scene is removed from the node editor. |
+| NodeEditor | `.view_changed` | `GraphicsView` | Emitted when the view is changed. |
