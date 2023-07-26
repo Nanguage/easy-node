@@ -6,7 +6,7 @@ from easynode import (
 
 
 app = QtWidgets.QApplication([])
-editor = NodeEditor()
+editor = NodeEditor(init_scene=True)
 graph = editor.current_scene.graph
 
 

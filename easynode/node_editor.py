@@ -21,6 +21,7 @@ class NodeEditor(QtWidgets.QWidget):
             parent: T.Optional[QtWidgets.QWidget] = None,
             setting: T.Optional[EditorSetting] = None,
             style_sheet: T.Optional[str] = None,
+            init_scene: bool = True,
             ) -> None:
         super().__init__(parent)
         if setting is None:
@@ -31,6 +32,8 @@ class NodeEditor(QtWidgets.QWidget):
         self.views: T.List[GraphicsView] = []
         self.current_view: T.Optional[GraphicsView] = None
         self.init_layout()
+        if init_scene:
+            self.add_scene_and_view()
         self.load_style_sheet(style_sheet)
         self.tabs.currentChanged.connect(self._on_tab_changed)
 
@@ -63,7 +66,6 @@ class NodeEditor(QtWidgets.QWidget):
         self.tabs = CustomTabWidget(self)
         self.tabs.add_btn.clicked.connect(self.add_scene_and_view)
         self.tabs.tabCloseRequested.connect(self.delete_tab)
-        self.add_scene_and_view()
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -76,16 +78,21 @@ class NodeEditor(QtWidgets.QWidget):
             if f"scene {i}" not in tab_names:
                 return f"scene {i}"
 
-    def add_scene_and_view(self):
+    def add_scene_and_view(
+            self, *,
+            tab_name: T.Optional[str] = None
+            ) -> T.Tuple[GraphicsScene, GraphicsView]:
         scene = GraphicsScene(self)
         view = GraphicsView(scene, self)
         self.scenes.append(scene)
         self.scene_added.emit(scene)
         self.views.append(view)
-        new_tab_name = self._get_new_tab_name()
-        new_tab_idx = self.tabs.addTab(view, new_tab_name)
+        if tab_name is None:
+            tab_name = self._get_new_tab_name()
+        new_tab_idx = self.tabs.addTab(view, tab_name)
         self.tabs.setCurrentIndex(new_tab_idx)
         self.current_view = view
+        return scene, view
 
     def delete_tab(self, index: int):
         self.tabs.removeTab(index)

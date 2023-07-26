@@ -84,8 +84,7 @@ class IntPortWidget(PortWidget):
         widget = QtWidgets.QSpinBox(**kwargs)
         widget.setContextMenuPolicy(
             Qt.ContextMenuPolicy.NoContextMenu)
-        if self.port.data_default is not None:
-            assert isinstance(self.port.data_default, int)
+        if isinstance(self.port.data_default, int):
             widget.setValue(self.port.data_default)
         if self.port.data_range is not None:
             data_range = self.port.data_range
