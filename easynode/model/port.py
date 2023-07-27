@@ -27,14 +27,14 @@ class Port(QtCore.QObject):
         self.name = name
         self.node: T.Optional["Node"] = None
         self.item: T.Optional["PortItem"] = None
-        self.type: T.Optional[str] = None
+        self.type: T.Optional[str] = None  # 'in' or 'out'
         self.edges: T.Set["Edge"] = set()
         self.edge_added.connect(self.on_edge_added)
         self.edge_removed.connect(self.on_edge_removed)
         self._setting = setting
 
     def blueprint_copy(self) -> "Port":
-        return Port(self.name, self.setting)
+        return self.__class__(self.name, self.setting)
 
     @property
     def setting(self) -> "PortSetting":
@@ -99,7 +99,7 @@ class DataPort(Port):
         self.widget_init_value: T.Optional[T.Any] = None
 
     def blueprint_copy(self) -> "DataPort":
-        return DataPort(
+        return self.__class__(
             self.name, self.data_type, self.data_range,
             self.data_default, self.widget_args, self.setting)
 

@@ -8,6 +8,7 @@ from .edge_item import EdgeItem
 from .node_item import NodeItem
 from ..utils.serialization import deserialize_subgraph
 from ..utils.misc import point2pointf
+from ..widgets.node_list import NodeList
 
 try:
     from qtpy.QtWidgets import QUndoStack
@@ -80,7 +81,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def _init_node_list(self):
         factory_table = self.scene().editor.factory_table
-        self.node_list_widget = factory_table.create_node_list_widget()
+        self.node_list_widget = NodeList(factory_table)
         self.node_list_widget.setFixedHeight(
             self.setting.node_list_widget_height)
         self.node_list_widget.list.item_clicked.connect(
@@ -273,7 +274,7 @@ class GraphicsView(QtWidgets.QGraphicsView):
 
     def create_node(self, factory_type_name: str, pos: QtCore.QPointF):
         """Create a node at the given position."""
-        factory = self.scene().editor.factory_table.table[factory_type_name]
+        factory = self.scene().editor.factory_table[factory_type_name]
         node = factory()
         self.scene().graph.add_node(node)
         assert node.item is not None

@@ -42,10 +42,7 @@ class TestNode3(Node):
         return QtWidgets.QTextEdit()
 
 
-editor.factory_table.register(TestNode1)
-editor.factory_table.register(TestNode2)
-editor.factory_table.register(TestNode3)
-
+editor.register_factory(TestNode1, TestNode2, TestNode3)
 n1 = TestNode1()
 n2 = TestNode1()
 n3 = TestNode2()

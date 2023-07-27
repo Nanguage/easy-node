@@ -5,7 +5,6 @@ from qtpy import QtWidgets, QtCore
 from .graphics.scene import GraphicsScene
 from .graphics.view import GraphicsView
 from .setting import EditorSetting
-from .node_factory import NodeFactoryTable
 from .widgets.custom_tab import CustomTabWidget
 from .model.node import Node
 from .model.graph import Graph
@@ -27,7 +26,7 @@ class NodeEditor(QtWidgets.QWidget):
         if setting is None:
             setting = EditorSetting()
         self.setting = setting
-        self.factory_table = NodeFactoryTable()
+        self.factory_table = {}
         self.scenes: T.List[GraphicsScene] = []
         self.views: T.List[GraphicsView] = []
         self.current_view: T.Optional[GraphicsView] = None
@@ -36,6 +35,10 @@ class NodeEditor(QtWidgets.QWidget):
             self.add_scene_and_view()
         self.load_style_sheet(style_sheet)
         self.tabs.currentChanged.connect(self._on_tab_changed)
+
+    def register_factory(self, *factories: T.Type[Node]) -> None:
+        for factory in factories:
+            self.factory_table[factory.type_name()] = factory
 
     def _on_tab_changed(self, index: int):
         index -= 1
@@ -56,7 +59,7 @@ class NodeEditor(QtWidgets.QWidget):
             self, type_name,
             node_name: T.Optional[str] = None,
             **attrs) -> Node:
-        factory = self.factory_table.table.get(type_name)
+        factory = self.factory_table.get(type_name)
         if factory is None:
             raise ValueError(f"Node type {type_name} not found")
         node = factory(name=node_name, **attrs)
